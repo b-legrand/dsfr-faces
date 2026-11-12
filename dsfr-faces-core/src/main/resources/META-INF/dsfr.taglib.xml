@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facelet-taglib xmlns="https://jakarta.ee/xml/ns/jakartaee"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facelettaglibrary_4_0.xsd"
+                version="4.0">
+    <description>dsfr-faces: Jakarta Faces components rendering DSFR markup</description>
+    <namespace>http://gouv.fr/dsfr-faces</namespace>
+    <short-name>dsfr</short-name>
+
+    <!-- ================================================================ head -->
+    <tag>
+        <description>DSFR stylesheets, favicons and scripts. Place inside h:head.</description>
+        <tag-name>head</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Head</component-type>
+        </component>
+        <attribute>
+            <description>system (default), light, dark; empty to manage data-fr-scheme on html yourself (e.g. strict CSP).</description>
+            <name>scheme</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>Include fr-icon-* utility classes. Default true.</description>
+            <name>icons</name>
+            <type>boolean</type>
+        </attribute>
+        <attribute>
+            <description>Include DSFR favicons and manifest. Default true.</description>
+            <name>favicon</name>
+            <type>boolean</type>
+        </attribute>
+        <attribute>
+            <description>theme-color meta. Default #000091.</description>
+            <name>themeColor</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+    </tag>
+
+    <!-- ================================================================ inputText -->
+    <tag>
+        <description>DSFR text field (fr-input-group) with label, hint and inline messages. Supports f:ajax, converters and validators.</description>
+        <tag-name>inputText</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.InputText</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute>
+            <description>Label text (required for accessibility). Also used in validation messages.</description>
+            <name>label</name><required>true</required><type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>Additional description rendered under the label (fr-hint-text).</description>
+            <name>hint</name><type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>HTML input type: text (default), email, tel, url, number, date, search, password...</description>
+            <name>type</name><type>java.lang.String</type>
+        </attribute>
+        <attribute><name>placeholder</name><type>java.lang.String</type></attribute>
+        <attribute>
+            <description>HTML autocomplete token, e.g. email, given-name, family-name (RGAA 11.13).</description>
+            <name>autocomplete</name><type>java.lang.String</type>
+        </attribute>
+        <attribute><name>inputmode</name><type>java.lang.String</type></attribute>
+        <attribute><name>maxlength</name><type>java.lang.Integer</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>readonly</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute>
+            <name>validator</name>
+            <method-signature>void validate(jakarta.faces.context.FacesContext, jakarta.faces.component.UIComponent, java.lang.Object)</method-signature>
+        </attribute>
+        <attribute>
+            <name>valueChangeListener</name>
+            <method-signature>void valueChange(jakarta.faces.event.ValueChangeEvent)</method-signature>
+        </attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+    </tag>
+
+    <!-- ================================================================ button -->
+    <tag>
+        <description>DSFR button (fr-btn) bound to a Faces action. Add f:ajax for ajax behaviour.</description>
+        <tag-name>button</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Button</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute>
+            <description>Button label.</description>
+            <name>value</name><required>true</required><type>java.lang.Object</type>
+        </attribute>
+        <attribute>
+            <name>action</name>
+            <method-signature>java.lang.Object action()</method-signature>
+        </attribute>
+        <attribute>
+            <name>actionListener</name>
+            <method-signature>void actionListener(jakarta.faces.event.ActionEvent)</method-signature>
+        </attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute>
+            <description>submit (default), button, reset.</description>
+            <name>type</name><type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>primary (default), secondary, tertiary, tertiary-no-outline.</description>
+            <name>priority</name><type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>sm, md (default), lg.</description>
+            <name>size</name><type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>DSFR icon class, e.g. fr-icon-checkbox-circle-line.</description>
+            <name>icon</name><type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>left (default), right, only.</description>
+            <name>iconPosition</name><type>java.lang.String</type>
+        </attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ messages -->
+    <tag>
+        <description>Faces messages rendered as DSFR alerts (fr-alert).</description>
+        <tag-name>messages</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Messages</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute>
+            <description>Only messages not attached to a component. Default false.</description>
+            <name>globalOnly</name><type>boolean</type>
+        </attribute>
+        <attribute>
+            <description>Only messages of the component with this id.</description>
+            <name>for</name><type>java.lang.String</type>
+        </attribute>
+        <attribute><name>showSummary</name><type>boolean</type></attribute>
+        <attribute><name>showDetail</name><type>boolean</type></attribute>
+        <attribute><name>redisplay</name><type>boolean</type></attribute>
+        <attribute>
+            <description>Element for alert titles: h2..h6 or p. Default h3.</description>
+            <name>titleTag</name><type>java.lang.String</type>
+        </attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+</facelet-taglib>

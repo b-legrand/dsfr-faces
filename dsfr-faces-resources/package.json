@@ -1,0 +1,12 @@
+{
+  "name": "dsfr-faces-resources",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Récupère le DSFR depuis npm ; exécuté par le build Maven (frontend-maven-plugin), ne pas lancer à la main",
+  "dependencies": {
+    "@gouvfr/dsfr": "1.15.4"
+  },
+  "allowScripts": {
+    "@gouvfr/dsfr@1.15.4": true
+  }
+}

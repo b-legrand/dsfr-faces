@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.gouv.dsfr</groupId>
+        <artifactId>dsfr-faces-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>dsfr-faces-showcase</artifactId>
+    <packaging>war</packaging>
+    <name>dsfr-faces :: showcase</name>
+    <description>
+        Portable WAR: no server-specific descriptor or plugin. Deploy it on any Jakarta EE 11 (Web Profile)
+        runtime, or on a servlet container that bundles Faces 4.1 + CDI.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-web-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.gouv.dsfr</groupId>
+            <artifactId>dsfr-faces-core</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>dsfr-faces-showcase</finalName>
+    </build>
+</project>

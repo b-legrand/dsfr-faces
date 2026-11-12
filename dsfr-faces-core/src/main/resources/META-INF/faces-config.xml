@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Its presence makes Faces implementations scan this jar for @FacesComponent / @FacesRenderer.
+    Declared as 4.0 on purpose: the library uses no Faces 4.1-only API, so it also runs on Faces 4.0.
+-->
+<faces-config xmlns="https://jakarta.ee/xml/ns/jakartaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd"
+              version="4.0">
+    <name>dsfr_faces</name>
+</faces-config>
