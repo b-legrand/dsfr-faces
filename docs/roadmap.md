@@ -43,6 +43,11 @@ C'est la phase qui conditionne l'objectif. Sans elle, le `sed` produit des pages
   `switchToItem()` branchés sur l'API JS du DSFR.
 - ⬜ **Tolérance des attributs** : accepter les attributs RichFaces sans équivalent et avertir en mode
   Development.
+- ✅ **Migration facultative** `dsfr-faces-migrate` (`scripts/migrate-fields.sh`) : enveloppe les motifs
+  libellé + champ + message dans `dsfr:field` (groupe DSFR), en conservant la mise en forme ; tests
+  unitaires et page de démonstration distincte (`/richfaces-fields/`) testée par Playwright.
+- ⬜ Migration facultative, niveau suivant : conversion d'un `dsfr:field` en `dsfr:inputText` (change
+  l'identifiant client du champ, à relire).
 - 🟡 **Script de migration** : `scripts/migrate-richfaces.sh` applique le `sed`. Restent l'inventaire
   (balises, fonctions EL, `RichFaces.*`, skins, CSS `rf-*`) et le rapport de ce qui n'est pas pris en
   charge.
@@ -77,7 +82,8 @@ Par ordre de valeur pour une application de gestion :
   `h:inputText` invisibles.
 - ⬜ `h:dataTable` → tableau DSFR (conteneurs `fr-table` autour de `<table>`), avec `rich:dataTable`.
 - ⬜ Cases à cocher et boutons radio `h:` (structure `fr-checkbox-group` / `fr-radio-group` à produire).
-- ⬜ État d'erreur visible des champs `h:` (le DSFR ne le dessine que par le groupe).
+- ✅ État d'erreur visible des champs `h:` : par `dsfr:field` (migration facultative). Sans lui, l'erreur
+  reste signalée par le message et `aria-invalid`.
 
 ## Phase 3 : composants P2 / P3
 - ⬜ Composants P2 : `autocomplete` (dégradé), `extendedDataTable`, `fileUpload`, `tooltip`,
@@ -118,7 +124,7 @@ Par ordre de valeur pour une application de gestion :
 | Sujet | Détail |
 |---|---|
 | Classes ajoutées par `dsfr-faces-html` | repèrent l'élément principal par le nom de balise et le composant passé à `startElement` ; vérifié sous Mojarra, à vérifier sous MyFaces |
-| Pas de tests unitaires | seulement les tests d'intégration Playwright, sous GlassFish / Mojarra uniquement |
+| Tests unitaires | seulement pour l'outil de migration (`dsfr-faces-migrate`) ; les composants ne sont couverts que par les tests Playwright, sous GlassFish / Mojarra uniquement |
 | Marge des alertes | les alertes DSFR n'ont pas de marge externe : prévoir `alertStyleClass` (p. ex. `fr-mb-3w`) sur `dsfr:messages` |
 | Version DSFR en double | dans `dsfr-faces-resources/package.json` et `pom.xml` (`<dsfr.version>`) ; à lire depuis `node_modules/@gouvfr/dsfr/package.json` au build |
 | Taille du jar de ressources | 5 Mo, car tout `dist/` est copié (y compris `dist/dsfr/` en double et les CSS par composant) ; à réduire au strict nécessaire |

@@ -1,7 +1,6 @@
 package fr.gouv.dsfr.faces.html;
 
 import jakarta.faces.component.UIComponent;
-import jakarta.faces.component.UIInput;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.ResponseWriter;
 import jakarta.faces.render.Renderer;
@@ -12,7 +11,7 @@ import java.io.IOException;
 /**
  * Wraps a standard renderer of the Faces implementation: the implementation still produces the HTML
  * (behaviors, pass-through attributes, ajax scripts...), a {@link DsfrClassWriter} adds the DSFR class
- * to its main element.
+ * to its main element, and the {@link Decoration} (aria attributes, label suffix in a dsfr:field).
  */
 final class DsfrClassRenderer extends RendererWrapper {
 
@@ -35,8 +34,8 @@ final class DsfrClassRenderer extends RendererWrapper {
 
     private void encode(FacesContext context, UIComponent component, Encoding encoding) throws IOException {
         ResponseWriter original = context.getResponseWriter();
-        boolean invalid = component instanceof UIInput input && !input.isValid();
-        DsfrClassWriter writer = new DsfrClassWriter(original, component, dsfrClass, invalid);
+        DsfrClassWriter writer = new DsfrClassWriter(original, component,
+                Decoration.of(context, component, dsfrClass));
         context.setResponseWriter(writer);
         try {
             encoding.run();

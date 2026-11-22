@@ -11,6 +11,7 @@ Les exemples de HTML généré supposent `jakarta.faces.SEPARATOR_CHAR` = `-` et
 | [`dsfr:button`](#dsfrbutton) | Bouton | `h:commandButton`, `a4j:commandButton` (avec `f:ajax`) |
 | [`dsfr:messages`](#dsfrmessages) | Alerte | `rich:messages`, `h:messages` |
 | [`dsfr:message`](#dsfrmessage) | Messages de champ | `rich:message`, `h:message` |
+| [`dsfr:field`](#dsfrfield) | Groupe de champ | structure `h:outputLabel` + champ + message existante |
 
 Les balises `rich:` et `a4j:` des pages migrées sont décrites dans
 [migration-richfaces.md](migration-richfaces.md#module-de-compatibilité-dsfr-faces-richfaces-compat).
@@ -175,4 +176,46 @@ Tout composant dont l'attribut `ajaxRendered` vaut `true` est rafraîchi à chaq
 zones indiquées par `render`. C'est le comportement par défaut de `dsfr:messages` et `dsfr:message`.
 Il ne s'applique pas si la requête rafraîchit `@all`, si le composant est déjà dans une zone rafraîchie,
 ou si la source de la requête porte `limitRender="true"` (`a4j:`).
+
+---
+
+## `dsfr:field`
+
+Groupe DSFR (`fr-input-group`, ou `fr-select-group` pour une liste) **autour de composants standard
+existants**, sans changer leurs identifiants. C'est la cible de la [migration facultative](migration-richfaces.md#migration-facultative--groupes-dsfr-avec-dsfrfield).
+Pour une nouvelle page, préférer `dsfr:inputText`.
+
+```xml
+<dsfr:field id="loginField" hint="3 à 20 caractères">
+  <h:outputLabel for="login" value="Identifiant"/>
+  <h:inputText id="login" value="#{bean.login}" required="true"/>
+  <h:message id="loginMessage" for="login"/>
+</dsfr:field>
+```
+
+| Attribut | Défaut | Description |
+|---|---|---|
+| `hint` | | Aide affichée dans le libellé (`fr-hint-text`). Nécessite `dsfr-faces-html`. |
+| `styleClass` | | Classes ajoutées au groupe. |
+
+- **Champ du groupe :** le premier enfant `UIInput`. **Message :** l'enfant `h:message`, `rich:message` ou
+  `dsfr:message` dont le `for` désigne ce champ.
+- **État :** `fr-input-group--error` si le champ est invalide ou a un message d'erreur, `--disabled` s'il
+  est désactivé.
+- **Avec `dsfr-faces-html`** (tiré par `dsfr-faces-richfaces-compat`) :
+  - le libellé reçoit ` *` si le champ est obligatoire, puis l'aide ;
+  - le champ reçoit `aria-required="true"` et `aria-describedby` vers le message.
+- **Ajax :** rafraîchi automatiquement par toute requête ajax qui exécute son champ (sa valeur soumise est
+  réaffichée, rien n'est perdu), sauf pour les événements de frappe envoyés par le champ lui-même.
+
+```html
+<div id="request-emailField" class="fr-input-group fr-input-group--error">
+  <label for="request-email" class="fr-label">Adresse électronique *</label>
+  <input id="request-email" type="text" name="request-email" value="x" class="fr-input"
+         aria-invalid="true" aria-required="true" aria-describedby="request-emailMessage" onblur="…">
+  <div class="fr-messages-group" id="request-emailMessage" aria-live="polite">
+    <p class="fr-message fr-message--error" id="request-emailMessage-0">Le format…</p>
+  </div>
+</div>
+```
 

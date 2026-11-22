@@ -80,4 +80,21 @@
         <attribute><name>ajaxRendered</name><type>boolean</type></attribute>
         <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
     </tag>
+
+    <!-- ================================================================ field -->
+    <tag>
+        <description>dsfr-faces extension (not RichFaces), added by the optional migration tool: DSFR field group (fr-input-group / fr-select-group) around existing standard components (h:outputLabel, h:inputText, h:selectOneMenu, h:message / rich:message), without changing their ids. Error state from the field; with dsfr-faces-html: required mark and hint in the label, aria-required / aria-describedby on the field. Re-rendered by ajax requests that execute its field.</description>
+        <tag-name>field</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Field</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute>
+            <description>Additional description rendered in the label (fr-hint-text). Needs dsfr-faces-html.</description>
+            <name>hint</name><type>java.lang.String</type>
+        </attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
 </facelet-taglib>

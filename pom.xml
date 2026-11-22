@@ -17,6 +17,7 @@
         <module>dsfr-faces-core</module>
         <module>dsfr-faces-html</module>
         <module>dsfr-faces-richfaces-compat</module>
+        <module>dsfr-faces-migrate</module>
         <module>dsfr-faces-showcase</module>
     </modules>
 
@@ -32,6 +33,7 @@
         <node.version>v24.22.2</node.version>
         <!-- Jakarta EE 11 => Jakarta Faces 4.1. Only "provided" APIs: the runtime brings the implementation. -->
         <jakartaee.version>11.0.0</jakartaee.version>
+        <junit.version>5.11.4</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -50,6 +52,17 @@
             <dependency>
                 <groupId>fr.gouv.dsfr</groupId>
                 <artifactId>dsfr-faces-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>fr.gouv.dsfr</groupId>
+                <artifactId>dsfr-faces-migrate</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -97,6 +110,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.5.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

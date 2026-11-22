@@ -157,9 +157,12 @@ Tests couverts :
 | Fichier | Vérifie |
 |---|---|
 | `tests/showcase.spec.ts` | chargement du DSFR, erreurs des champs obligatoires, validation au blur, envoi ajax et non ajax |
+| `tests/richfaces-fields.spec.ts` | migration facultative, sur une page distincte (`sed` puis `dsfr-faces-migrate`) : groupes `dsfr:field`, mention obligatoire et ARIA, état d'erreur rafraîchi en ajax sans `render`, saisie `keyup` non interrompue, `h:panelGrid` laissé tel quel |
 | `tests/richfaces-migration.spec.ts` | page RichFaces migrée par `sed` : en-tête DSFR injecté, classes DSFR sur les `h:` visibles, `rich:clientId`, `a4j:ajax` et `rich:message` (`ajaxRendered`), `a4j:commandButton` avec `render` hors du formulaire et `oncomplete` |
 
 Chaque test échoue aussi si la page écrit une erreur dans la console.
+
+L'outil de migration facultative a aussi des tests unitaires (JUnit), lancés par `mvn package`.
 
 ### Version de Playwright
 

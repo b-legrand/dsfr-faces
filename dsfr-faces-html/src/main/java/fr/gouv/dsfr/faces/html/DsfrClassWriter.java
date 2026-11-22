@@ -6,54 +6,105 @@ import jakarta.faces.context.ResponseWriterWrapper;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * Response writer installed while a standard renderer encodes {@code target}: on the first matching element
- * started with {@code target}, merges the DSFR class into the {@code class} attribute written by the renderer
- * ({@code styleClass}), or adds one when the renderer writes none, just before the start tag is closed.
- * Also adds {@code aria-invalid="true"} to invalid inputs.
+ * Response writer installed while a standard renderer encodes {@code target}. On the first matching element
+ * started with {@code target}:
+ * <ul>
+ *     <li>merges the DSFR class into the {@code class} attribute written by the renderer
+ *     ({@code styleClass}), or adds one just before the start tag is closed;</li>
+ *     <li>adds the attributes of the {@link Decoration} ({@code aria-*}), merging {@code aria-describedby};</li>
+ *     <li>for a label, writes the required mark and the hint just before its end tag (which may come in a
+ *     later encode call: Mojarra and MyFaces start the label in encodeBegin and end it in encodeEnd).</li>
+ * </ul>
  */
 final class DsfrClassWriter extends ResponseWriterWrapper {
 
+    private static final String LABEL = "label";
+
     private final UIComponent target;
-    private final DsfrClass dsfrClass;
-    private final boolean invalid;
+    private final Decoration decoration;
 
     private boolean matched;
     private boolean inStartTag;
-    private boolean classWritten;
-    private boolean ariaInvalidWritten;
+    private final Set<String> written = new HashSet<>();
+    /** Depth of label elements opened through this writer; the target label is at {@link #targetDepth}. */
+    private int labelDepth;
+    private int targetDepth = -1;
+    private boolean suffixWritten;
 
-    DsfrClassWriter(ResponseWriter wrapped, UIComponent target, DsfrClass dsfrClass, boolean invalid) {
+    DsfrClassWriter(ResponseWriter wrapped, UIComponent target, Decoration decoration) {
         super(wrapped);
         this.target = target;
-        this.dsfrClass = dsfrClass;
-        this.invalid = invalid;
+        this.decoration = decoration;
     }
 
     @Override
     public void startElement(String name, UIComponent component) throws IOException {
         closeStartTag();
         super.startElement(name, component);
-        if (!matched && component == target && dsfrClass.elements().contains(name)) {
+        if (LABEL.equals(name)) {
+            labelDepth++;
+        }
+        if (!matched && component == target && decoration.dsfrClass().elements().contains(name)) {
             matched = true;
             inStartTag = true;
+            if (LABEL.equals(name)) {
+                targetDepth = labelDepth;
+            }
         }
     }
 
     @Override
     public void writeAttribute(String name, Object value, String property) throws IOException {
-        if (inStartTag && "class".equals(name)) {
-            classWritten = true;
-            super.writeAttribute(name, merge(value), property);
-            return;
-        }
-        if (inStartTag && "aria-invalid".equals(name)) {
-            ariaInvalidWritten = true;
+        if (inStartTag) {
+            written.add(name);
+            if ("class".equals(name)) {
+                super.writeAttribute(name, mergeClass(value), property);
+                return;
+            }
+            String extra = decoration.attributes().get(name);
+            if (extra != null && "aria-describedby".equals(name) && value != null) {
+                super.writeAttribute(name, value + " " + extra, property);
+                return;
+            }
         }
         super.writeAttribute(name, value, property);
+    }
+
+    @Override
+    public void endElement(String name) throws IOException {
+        closeStartTag();
+        if (LABEL.equals(name)) {
+            // the target label: opened here (matched) or before this encode call (depth 0)
+            boolean targetLabel = matched ? labelDepth == targetDepth : labelDepth == 0;
+            if (targetLabel && !suffixWritten && decoration.hasLabelSuffix()) {
+                writeLabelSuffix();
+            }
+            if (labelDepth > 0) {
+                labelDepth--;
+            }
+        }
+        super.endElement(name);
+    }
+
+    /** {@code " *<span class="fr-hint-text">hint</span>"}, as dsfr:inputText. */
+    private void writeLabelSuffix() throws IOException {
+        suffixWritten = true;
+        if (decoration.required()) {
+            super.writeText(" *", null);
+        }
+        String hint = decoration.hint();
+        if (hint != null && !hint.isBlank()) {
+            super.startElement("span", null);
+            super.writeAttribute("class", "fr-hint-text", null);
+            super.writeText(hint, null);
+            super.endElement("span");
+        }
     }
 
     /** Writes the pending attributes; the underlying writer closes the start tag on the next call. */
@@ -62,17 +113,19 @@ final class DsfrClassWriter extends ResponseWriterWrapper {
             return;
         }
         inStartTag = false;
-        if (!classWritten) {
-            super.writeAttribute("class", merge(null), null);
+        if (!written.contains("class")) {
+            super.writeAttribute("class", mergeClass(null), null);
         }
-        if (invalid && !ariaInvalidWritten) {
-            super.writeAttribute("aria-invalid", "true", null);
+        for (Map.Entry<String, String> entry : decoration.attributes().entrySet()) {
+            if (!written.contains(entry.getKey())) {
+                super.writeAttribute(entry.getKey(), entry.getValue(), null);
+            }
         }
     }
 
-    private String merge(Object existing) {
+    private String mergeClass(Object existing) {
         Set<String> classes = new LinkedHashSet<>();
-        classes.add(dsfrClass.cssClass());
+        classes.add(decoration.dsfrClass().cssClass());
         if (existing != null) {
             classes.addAll(Arrays.asList(existing.toString().trim().split("\\s+")));
         }
@@ -81,12 +134,6 @@ final class DsfrClassWriter extends ResponseWriterWrapper {
     }
 
     // ------------------------------------------------------------ every other output closes the start tag
-
-    @Override
-    public void endElement(String name) throws IOException {
-        closeStartTag();
-        super.endElement(name);
-    }
 
     @Override
     public void writeText(Object text, String property) throws IOException {

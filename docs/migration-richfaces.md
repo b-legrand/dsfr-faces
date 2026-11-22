@@ -28,6 +28,20 @@ Démonstration : le showcase contient une page RichFaces d'origine
 (`dsfr-faces-showcase/src/main/richfaces/inscription.xhtml`). Le build la migre avec le script et la
 publie sous `/richfaces/inscription.xhtml`, et les tests Playwright vérifient qu'elle fonctionne.
 
+## Deux chemins de migration
+
+| | Migration **obligatoire** | Migration **facultative** |
+|---|---|---|
+| Outil | `sed` ([`scripts/migrate-richfaces.sh`](../scripts/migrate-richfaces.sh)) | `dsfr-faces-migrate` ([`scripts/migrate-fields.sh`](../scripts/migrate-fields.sh)), après le `sed` |
+| Effet | renomme `rich:` en `dsfr:` ; les pages fonctionnent avec le rendu DSFR | enveloppe chaque libellé + champ + message dans `dsfr:field` : vrai groupe DSFR (état d'erreur, mention obligatoire, liens ARIA) |
+| Identifiants, JavaScript | inchangés | inchangés |
+| Revue | aucune | relire le diff ; traiter à la main les champs signalés |
+| Démonstration (showcase) | `/richfaces/inscription.xhtml` | `/richfaces-fields/contact.xhtml` |
+| Tests e2e | `richfaces-migration.spec.ts` | `richfaces-fields.spec.ts` (pages distinctes) |
+
+Les deux chemins sont testés séparément : chacun a ses propres pages RichFaces d'origine
+(`src/main/richfaces` et `src/main/richfaces-fields`), migrées à chaque build du showcase.
+
 ## Ce que fait réellement le `sed`
 
 Prenons une page RichFaces typique :
@@ -164,6 +178,71 @@ Détails :
 - `#{rich:component('x')}` produit `RichFaces.component('…')`, mais l'objet JS `RichFaces` n'existe pas
   encore : il viendra avec `rich:popupPanel`.
 - Toutes les autres balises `rich:` et `a4j:` (voir les tableaux ci-dessous).
+
+## Migration facultative : groupes DSFR avec `dsfr:field`
+
+Après le `sed`, les champs `h:` ont les classes DSFR (`dsfr-faces-html`) mais pas le **groupe** DSFR : pas
+d'état d'erreur visible, pas de mention obligatoire, message non relié au champ. L'outil
+`dsfr-faces-migrate` ajoute ce groupe sans toucher aux identifiants :
+
+```sh
+mvn -pl dsfr-faces-migrate package             # une fois
+scripts/migrate-fields.sh --dry-run src/main/webapp   # rapport seul
+scripts/migrate-fields.sh src/main/webapp             # modifie les fichiers
+```
+
+Avant (après le `sed`) :
+
+```xml
+<h:outputLabel for="email" value="Adresse électronique"/>
+<h:inputText id="email" value="#{bean.email}" required="true">
+    <a4j:ajax event="blur"/>
+</h:inputText>
+<dsfr:message id="emailMessage" for="email"/>
+```
+
+Après :
+
+```xml
+<dsfr:field id="emailField">
+    <h:outputLabel for="email" value="Adresse électronique"/>
+    <h:inputText id="email" value="#{bean.email}" required="true">
+        <a4j:ajax event="blur"/>
+    </h:inputText>
+    <dsfr:message id="emailMessage" for="email"/>
+</dsfr:field>
+```
+
+Règles de l'outil :
+
+- **Motif reconnu :** un `h:outputLabel for="x"`, suivi du champ `id="x"` (`h:inputText`, `h:inputSecret`,
+  `h:inputTextarea`, `h:selectOne*`, `h:selectMany*` en menu ou liste), puis éventuellement de son message
+  (`h:message`, `rich:message` ou `dsfr:message` avec `for="x"`). Seuls des espaces et des commentaires
+  peuvent les séparer.
+- **Non enveloppés, et signalés avec leur numéro de ligne :** les champs dans un `h:panelGrid` (chaque
+  enfant y est une cellule), ceux sans libellé juste avant, ceux sans `id`.
+- **Le reste du fichier est conservé caractère pour caractère.** L'outil insère l'enveloppe et ré-indente
+  les lignes enveloppées, jamais à l'intérieur d'une valeur d'attribut, d'un commentaire ou d'un CDATA.
+- **Idempotent :** le relancer ne change rien.
+- **Préfixe :** `dsfr:field` utilise le préfixe lié à `http://gouv.fr/dsfr-faces`, ou à défaut celui lié à
+  `http://richfaces.org/rich` (c'est `dsfr` après le `sed` ; la taglib de compatibilité déclare aussi
+  `field`). Sinon, l'outil déclare `xmlns:dsfr="http://gouv.fr/dsfr-faces"`.
+- L'identifiant du groupe vaut `{id du champ}Field`, rendu unique dans la page.
+- Code de sortie : 0, 1 si un fichier n'est pas du XML bien formé (il est alors laissé tel quel).
+
+Ce que `dsfr:field` apporte, avec `dsfr-faces-html` (voir [composants.md](composants.md#dsfrfield)) :
+
+- l'état d'erreur du groupe (`fr-input-group--error` : libellé rouge, barre latérale) ;
+- la mention obligatoire `*` dans le libellé et `aria-required` sur le champ ;
+- `aria-describedby` du champ vers son message ;
+- l'aide (`hint="…"`, à ajouter à la main).
+
+En ajax, le groupe est rafraîchi automatiquement quand son champ fait partie du `execute` (blur, envoi du
+formulaire…), même sans `render`. La seule exception est la frappe (`keyup`, `input`…) dans le champ
+lui-même, pour ne pas remplacer le champ en cours de saisie.
+
+Étape suivante possible, au cas par cas : remplacer le groupe par `dsfr:inputText` (meilleur rendu, mais
+l'identifiant client du champ devient `{id}-input`).
 
 ## Inventaire avant migration
 

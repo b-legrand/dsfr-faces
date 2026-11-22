@@ -12,12 +12,16 @@ find src/main/webapp -name '*.xhtml' -exec sed -i -e 's/\<rich:/dsfr:/g' -e 's/x
 
 (La seconde expression est nécessaire : la déclaration `xmlns:rich="…"` ne contient pas `rich:`.)
 
+Ensuite, une migration **facultative** (`scripts/migrate-fields.sh`) structure les champs existants en
+groupes DSFR (`dsfr:field` : état d'erreur, mention obligatoire, liens ARIA), sans changer les
+identifiants. Elle demande une relecture du diff.
+
 Les balises gardent leurs noms et leurs attributs RichFaces (`dsfr:dataTable`, `dsfr:popupPanel`,
 `dsfr:tabPanel`…), mais produisent du HTML DSFR accessible. Voir
 [docs/migration-richfaces.md](docs/migration-richfaces.md).
 
-> **État : v0.1, preuve de concept.** 5 composants (`head`, `inputText`, `button`, `messages`,
-> `message`), un premier noyau de compatibilité RichFaces (`rich:messages`, `rich:message`,
+> **État : v0.1, preuve de concept.** 6 composants (`head`, `inputText`, `button`, `messages`,
+> `message`, `field`), un premier noyau de compatibilité RichFaces (`rich:messages`, `rich:message`,
 > `a4j:ajax`, `a4j:commandButton`, fonctions EL) et le style DSFR des balises `h:` standard. Le showcase contient une page RichFaces d'origine,
 > migrée par ce `sed` au build et vérifiée par des tests Playwright. Le reste est dans la
 > [feuille de route](docs/roadmap.md).
@@ -85,7 +89,8 @@ docker compose down
 | `dsfr-faces-core` | Composants, renderers, `META-INF/dsfr.taglib.xml`. Dépend de `-resources`. |
 | `dsfr-faces-html` | Classes DSFR sur les balises `h:` standard (`h:inputText`, `h:selectOneMenu`, `h:commandButton`…) sans modifier les pages |
 | `dsfr-faces-richfaces-compat` | Taglibs aux URI RichFaces (`rich`, `a4j`) pour les pages migrées par `sed`. Remplace les jars RichFaces. Tire `dsfr-faces-html`. |
-| `dsfr-faces-showcase` | WAR de démonstration, portable, avec une page RichFaces migrée au build |
+| `dsfr-faces-migrate` | Outil de migration facultative : enveloppe libellé + champ + message dans `dsfr:field` |
+| `dsfr-faces-showcase` | WAR de démonstration, portable, avec des pages RichFaces migrées au build (chemin obligatoire et chemin facultatif) |
 | `e2e/` + `compose.yml` | Tests d'intégration Playwright (GlassFish + Chromium et Firefox, dans Docker) |
 
 ## Documentation

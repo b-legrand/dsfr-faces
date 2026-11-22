@@ -32,9 +32,16 @@ dsfr-faces/
 │       ├── RichAjaxBehavior       AjaxBehavior + recherche d'identifiants dans toute la vue
 │       ├── RichFunctions          fonctions EL rich:*
 │       └── AutoHeadListener       ajoute dsfr:head aux vues qui n'en ont pas
+├── dsfr-faces-migrate/      outil de migration facultative (Java, sans dépendance) : dsfr:field
+│   └── fr.gouv.dsfr.faces.migrate
+│       ├── XmlLite            analyseur XML qui garde les positions (édition en place)
+│       ├── FieldMigration     motif libellé + champ + message -> dsfr:field
+│       └── Main               ligne de commande
 ├── dsfr-faces-showcase/     WAR de démonstration
-│   └── src/main/richfaces/  page RichFaces d'origine, migrée par le sed au build -> /richfaces/
-├── scripts/migrate-richfaces.sh   le sed de migration
+│   ├── src/main/richfaces/         page RichFaces d'origine, migrée par le sed -> /richfaces/
+│   └── src/main/richfaces-fields/  page RichFaces d'origine, sed + dsfr-faces-migrate -> /richfaces-fields/
+├── scripts/migrate-richfaces.sh   migration obligatoire (sed)
+├── scripts/migrate-fields.sh      migration facultative (dsfr-faces-migrate)
 ├── compose.yml              tests d'intégration : GlassFish + Playwright
 └── e2e/                     tests Playwright
 ```
@@ -70,6 +77,22 @@ enveloppe le kit `HTML_BASIC`, et chaque renderer concerné est enveloppé à so
 `select`, `label`…) ouvert avec le composant, fusionne la classe DSFR dans l'attribut `class` écrit par
 le renderer, ou l'ajoute juste avant la fermeture de la balise ouvrante.
 
+### `dsfr:field` et `dsfr-faces-html`
+
+`dsfr:field` (cœur) ne rend que le `div` du groupe et son état. Le décor des enfants standard (mention
+obligatoire et aide dans le libellé, `aria-required` et `aria-describedby` sur le champ) est ajouté par
+`dsfr-faces-html` : `Decoration` regarde si le parent du composant rendu est un `DsfrField`, et le
+`DsfrClassWriter` écrit ces ajouts dans le HTML produit par le renderer de l'implémentation. Mojarra et
+MyFaces ouvrent le libellé dans `encodeBegin` et le ferment dans `encodeEnd` : la suite du libellé est
+écrite juste avant `</label>`, dans le second appel.
+
+### Outil de migration : édition en place
+
+`dsfr-faces-migrate` n'utilise ni DOM ni XSLT, qui réécriraient tout le fichier (attributs, espaces,
+entités). `XmlLite` relève la position de chaque élément et les zones à ne pas ré-indenter (valeurs
+d'attribut, commentaires, CDATA). `FieldMigration` produit des insertions de texte appliquées de la fin vers
+le début du fichier.
+
 ### `ajaxRendered` par un PartialViewContext
 
 `DsfrPartialViewContextFactory` (déclaré dans le `faces-config.xml` du cœur) enveloppe le
@@ -78,6 +101,10 @@ le renderer, ou l'ajoute juste avant la fermeture de la balise ouvrante.
 `ajaxRendered` vaut `true`, sauf ceux déjà contenus dans une zone rafraîchie. L'attribut de composant
 `fr.gouv.dsfr.limitRender.<événement>` (posé par `limitRender` des balises `a4j:`) désactive ce
 mécanisme pour la requête.
+
+Les `dsfr:field` sont ajoutés de la même façon quand leur champ figure dans `getExecuteIds()` (ou sous un
+identifiant exécuté, ou `@all`), sauf si l'événement est une frappe (`keyup`, `keydown`, `keypress`,
+`input`) envoyée par ce champ.
 
 ### Indépendance vis-à-vis du serveur
 

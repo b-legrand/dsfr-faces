@@ -27,6 +27,12 @@
             <groupId>fr.gouv.dsfr</groupId>
             <artifactId>dsfr-faces-core</artifactId>
         </dependency>
+        <!-- Optional migration tool, run on src/main/richfaces-fields at build time (not packaged) -->
+        <dependency>
+            <groupId>fr.gouv.dsfr</groupId>
+            <artifactId>dsfr-faces-migrate</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- Replaces the RichFaces jars for the migrated page under /richfaces/ -->
         <dependency>
             <groupId>fr.gouv.dsfr</groupId>
@@ -36,15 +42,17 @@
 
     <properties>
         <richfaces.migrated>${project.build.directory}/richfaces-migrated</richfaces.migrated>
+        <richfaces.fields>${project.build.directory}/richfaces-fields-migrated</richfaces.fields>
     </properties>
 
     <build>
         <finalName>dsfr-faces-showcase</finalName>
         <plugins>
             <!--
-                Migration demo: the original RichFaces pages (src/main/richfaces) are copied, migrated with
-                scripts/migrate-richfaces.sh (the sed of the README, GNU sed required) and published under
-                /richfaces/ in the WAR. Skip with -Dexec.skip (the pages are then served unmigrated and fail).
+                Migration demos, on original RichFaces pages (never edited by hand):
+                - mandatory path: src/main/richfaces -> sed (scripts/migrate-richfaces.sh, GNU sed) -> /richfaces/
+                - optional path: src/main/richfaces-fields -> sed -> dsfr-faces-migrate (dsfr:field) -> /richfaces-fields/
+                Skip with -Dexec.skip (the pages are then served unmigrated and fail).
             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -59,6 +67,20 @@
                             <resources>
                                 <resource>
                                     <directory>src/main/richfaces</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-richfaces-fields-pages</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${richfaces.fields}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/richfaces-fields</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>
@@ -82,6 +104,33 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>migrate-richfaces-fields-sed</id>
+                        <phase>process-resources</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>${project.basedir}/../scripts/migrate-richfaces.sh</argument>
+                                <argument>${richfaces.fields}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- declared after the sed: same phase, runs next -->
+                    <execution>
+                        <id>migrate-richfaces-fields-tool</id>
+                        <phase>process-resources</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <arguments>
+                                <argument>-cp</argument>
+                                <argument>${project.basedir}/../dsfr-faces-migrate/target/classes</argument>
+                                <argument>fr.gouv.dsfr.faces.migrate.Main</argument>
+                                <argument>${richfaces.fields}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -92,6 +141,10 @@
                         <resource>
                             <directory>${richfaces.migrated}</directory>
                             <targetPath>richfaces</targetPath>
+                        </resource>
+                        <resource>
+                            <directory>${richfaces.fields}</directory>
+                            <targetPath>richfaces-fields</targetPath>
                         </resource>
                     </webResources>
                 </configuration>

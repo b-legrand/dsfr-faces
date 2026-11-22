@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--
+    Page RichFaces 4.5 d'origine, NON modifiée à la main : démonstration de la migration FACULTATIVE.
+    Le build lui applique d'abord le sed obligatoire (scripts/migrate-richfaces.sh), puis l'outil
+    dsfr-faces-migrate, qui enveloppe chaque libellé + champ + message dans dsfr:field (groupe DSFR).
+    Résultat publié dans le WAR sous /richfaces-fields/.
+-->
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="http://richfaces.org/a4j">
+<h:head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Demande de contact – migration facultative</title>
+</h:head>
+<h:body>
+    <main class="fr-container fr-my-6w" id="content" role="main">
+        <h1>Demande de contact</h1>
+        <p>Page RichFaces migrée par <code>sed</code>, puis structurée en groupes DSFR par l'outil de
+            migration facultatif.</p>
+
+        <h:form id="request">
+            <rich:messages id="globalMessages" globalOnly="true" showDetail="true"/>
+
+            <h:outputLabel for="name" value="Nom"/>
+            <h:inputText id="name" value="#{contactRequest.name}" required="true" label="Nom">
+                <!-- live validation while typing -->
+                <a4j:ajax event="keyup"/>
+            </h:inputText>
+            <rich:message id="nameMessage" for="name"/>
+
+            <h:outputLabel for="email" value="Adresse électronique"/>
+            <h:inputText id="email" value="#{contactRequest.email}" required="true" label="Adresse électronique"
+                         validatorMessage="Le format de l'adresse électronique est invalide.">
+                <f:validateRegex pattern="[^@\s]+@[^@\s]+\.[^@\s]+"/>
+                <a4j:ajax event="blur"/>
+            </h:inputText>
+            <rich:message id="emailMessage" for="email"/>
+
+            <h:outputLabel for="topic" value="Sujet"/>
+            <h:selectOneMenu id="topic" value="#{contactRequest.topic}">
+                <f:selectItem itemLabel="Question" itemValue="question"/>
+                <f:selectItem itemLabel="Réclamation" itemValue="reclamation"/>
+            </h:selectOneMenu>
+
+            <h:outputLabel for="body" value="Message"/>
+            <h:inputTextarea id="body" value="#{contactRequest.body}" required="true" label="Message"/>
+            <rich:message id="bodyMessage" for="body"/>
+
+            <!-- legacy table layout: left as is by the optional migration (reported for manual review) -->
+            <h:panelGrid id="phoneGrid" columns="2">
+                <h:outputLabel for="phone" value="Téléphone"/>
+                <h:inputText id="phone" value="#{contactRequest.phone}"/>
+            </h:panelGrid>
+
+            <!-- no render: messages are ajaxRendered, field groups are re-rendered because executed -->
+            <a4j:commandButton id="send" value="Envoyer" action="#{contactRequest.send}"/>
+        </h:form>
+    </main>
+</h:body>
+</html>
