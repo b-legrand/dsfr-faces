@@ -14,7 +14,10 @@ Légende : ✅ fait · 🟡 partiel · ⬜ à faire
 - ✅ `dsfr:head` : CSS, icônes, favicons, JS module et `nomodule`, thème.
 - ✅ `dsfr:inputText` : groupe, aide, messages, ARIA, conversion par type, `f:ajax`.
 - ✅ `dsfr:button` : priorités, tailles, icônes, ajax ou non.
-- 🟡 `dsfr:messages` : alertes DSFR. Pas encore `ajaxRendered`.
+- ✅ `dsfr:messages` : alertes DSFR, `ajaxRendered` par défaut.
+- ✅ `dsfr:message` : messages DSFR d'un composant, `ajaxRendered` par défaut.
+- ✅ Tests d'intégration Playwright (Chromium, Firefox) via `docker compose`, versions image / bibliothèque
+  vérifiées.
 - ✅ Showcase vérifié dans Chrome sur GlassFish 8.0.5 / Mojarra 4.1.17.
 - ✅ Documentation en français.
 
@@ -22,22 +25,30 @@ Légende : ✅ fait · 🟡 partiel · ⬜ à faire
 
 C'est la phase qui conditionne l'objectif. Sans elle, le `sed` produit des pages qui ne se chargent pas.
 
-- ⬜ **Taglib `http://richfaces.org/rich`** reprenant les noms de balises RichFaces 4.5, servie par un
-  module `dsfr-faces-richfaces-compat`. Les URI des pages n'étant pas modifiées par le `sed`, c'est elle
-  qui sera résolue.
-- ⬜ **Taglib `http://richfaces.org/a4j`** : `a4j:ajax`, `commandButton`, `commandLink`,
-  `outputPanel`, `repeat`, `jsFunction`.
-- ⬜ **Fonctions EL** dans la taglib `rich` : `component`, `clientId`, `element`, `findComponent`,
+- 🟡 **Taglib `http://richfaces.org/rich`** dans le module `dsfr-faces-richfaces-compat` (les URI des
+  pages ne sont pas modifiées par le `sed`, c'est elle qui est résolue). Fait : `messages`, `message`.
+  Les autres balises arrivent avec les composants de la phase 2.
+- 🟡 **Taglib `http://richfaces.org/a4j`**. Fait : `a4j:ajax` (forme imbriquée) et
+  `a4j:commandButton`, sur l'`AjaxBehavior` standard. Restent : `commandLink`, `outputPanel`, `repeat`,
+  `jsFunction` et la forme englobante de `a4j:ajax`.
+- ✅ **Fonctions EL** dans la taglib `rich` : `component`, `clientId`, `element`, `findComponent`,
   `isUserInRole`, `jQuerySelector`.
-- ⬜ **`ajaxRendered`** : un `PartialViewContext` personnalisé ajoute à chaque réponse ajax les
-  composants `ajaxRendered` (`messages`, `message`, `a4j:outputPanel`).
+- ✅ **`ajaxRendered`** et **`limitRender`** : un `PartialViewContext` ajoute à chaque réponse ajax les
+  composants `ajaxRendered`.
+- ✅ **Recherche d'identifiants à la RichFaces** (`render`, `execute`, `for`, fonctions EL) : relative,
+  puis conteneurs de nommage englobants, puis toute la vue.
+- ✅ **Injection automatique de l'en-tête DSFR** dans les vues sans `dsfr:head` (paramètre
+  `fr.gouv.dsfr.richfaces.AUTO_HEAD`).
 - ⬜ **API JS minimale** `RichFaces.component(id)` / `#{rich:component}` : `show()`, `hide()` et
   `switchToItem()` branchés sur l'API JS du DSFR.
 - ⬜ **Tolérance des attributs** : accepter les attributs RichFaces sans équivalent et avertir en mode
   Development.
-- ⬜ **Script `dsfr-faces-migrate`** : inventaire (balises, fonctions EL, `RichFaces.*`, skins, CSS
-  `rf-*`), application du `sed`, rapport de ce qui n'est pas pris en charge.
-- ⬜ **Application RichFaces de référence** (échantillon réaliste) migrée en CI pour mesurer la couverture.
+- 🟡 **Script de migration** : `scripts/migrate-richfaces.sh` applique le `sed`. Restent l'inventaire
+  (balises, fonctions EL, `RichFaces.*`, skins, CSS `rf-*`) et le rapport de ce qui n'est pas pris en
+  charge.
+- 🟡 **Application RichFaces de référence** : une page d'origine (`src/main/richfaces/inscription.xhtml`)
+  est migrée par le script à chaque build du showcase et testée par Playwright. À étendre à un échantillon
+  réaliste pour mesurer la couverture.
 
 ## Phase 2 : composants P1
 
@@ -45,7 +56,7 @@ Par ordre de valeur pour une application de gestion :
 
 | Composant | Balises couvertes | État |
 |---|---|---|
-| Messages de champ | `rich:message` | ⬜ |
+| Messages de champ | `rich:message` | ✅ `dsfr:message` |
 | Tableau + colonnes (tri, lignes alternées, `rows`) | `rich:dataTable`, `rich:column` | ⬜ |
 | Pagination | `rich:dataScroller` | ⬜ |
 | Panneau | `rich:panel` (carte ou section, à arbitrer) | ⬜ |
@@ -58,10 +69,14 @@ Par ordre de valeur pour une application de gestion :
 | Lien d'action | `dsfr:commandLink` / `a4j:commandLink` | ⬜ |
 | Fieldset | regroupement de champs, erreurs de groupe | ⬜ |
 
-## Phase 3 : kit de rendu HTML et composants P2 / P3
+## Phase 2 bis : kit de rendu HTML (avancé, prioritaire)
 
-- ⬜ **Module `dsfr-faces-html`** (optionnel) : renderers `HTML_BASIC` remplacés pour appliquer les
-  classes DSFR aux balises `h:` laissées intactes par le `sed`.
+- ⬜ **Module `dsfr-faces-html`** : renderers `HTML_BASIC` remplacés pour appliquer les classes DSFR aux
+  balises `h:` laissées intactes par le `sed` (`inputText`, `selectOneMenu`, `selectBooleanCheckbox`,
+  `outputLabel`, `commandButton` en premier). Constat sur la page de démonstration : sans lui, la remise
+  à zéro CSS du DSFR rend les `h:inputText` **invisibles** (aucune bordure).
+
+## Phase 3 : composants P2 / P3
 - ⬜ Composants P2 : `autocomplete` (dégradé), `extendedDataTable`, `fileUpload`, `tooltip`,
   `toolbar`, `dropDownMenu` / menus, `panelMenu` → menu latéral, `inputNumberSpinner`, `inputNumberSlider`,
   `componentControl`, `placeholder`, `focus`.
@@ -99,7 +114,7 @@ Par ordre de valeur pour une application de gestion :
 
 | Sujet | Détail |
 |---|---|
-| Aucun test automatisé | uniquement une vérification manuelle dans Chrome pour l'instant |
+| Pas de tests unitaires | seulement les tests d'intégration Playwright, sous GlassFish / Mojarra uniquement |
 | Marge des alertes | les alertes DSFR n'ont pas de marge externe : prévoir `alertStyleClass` (p. ex. `fr-mb-3w`) sur `dsfr:messages` |
 | Version DSFR en double | dans `dsfr-faces-resources/package.json` et `pom.xml` (`<dsfr.version>`) ; à lire depuis `node_modules/@gouvfr/dsfr/package.json` au build |
 | Taille du jar de ressources | 5 Mo, car tout `dist/` est copié (y compris `dist/dsfr/` en double et les CSS par composant) ; à réduire au strict nécessaire |
@@ -109,3 +124,7 @@ Par ordre de valeur pour une application de gestion :
 | Séparateur `-` | les `id` de composants ne doivent pas contenir `-` ; le documenter dans le script de migration |
 | Mode « succès » | Faces n'a pas de sévérité succès : convention à définir (p. ex. `INFO` + attribut) pour `fr-alert--success` / `fr-message--valid` |
 | Ajax : source = enveloppe | vérifié sous Mojarra ; à vérifier sous MyFaces |
+| `ajaxRendered` sous MyFaces | suppose que `PartialViewContext.getRenderIds()` est modifiable (exigé par la spécification, vérifié sous Mojarra) |
+| Coût de `ajaxRendered` | un parcours de l'arbre par réponse ajax ; à mesurer sur de grosses vues |
+| `RichFaces.component()` | produit par `#{rich:component}`, mais l'objet JS `RichFaces` n'existe pas encore |
+| GNU sed requis | `scripts/migrate-richfaces.sh` et le build du showcase utilisent `\<` et `sed -i` (GNU) |

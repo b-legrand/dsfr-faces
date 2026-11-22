@@ -65,7 +65,8 @@ public class DsfrButtonRenderer extends DsfrRendererBase {
         if (button.isDisabled()) {
             w.writeAttribute("disabled", "disabled", null);
         }
-        renderBehaviors(context, button, id, DOM_EVENTS, true);
+        renderBehaviors(context, button, id, DOM_EVENTS, true,
+                isBlank(button.getOnclick()) ? Map.of() : Map.of("click", button.getOnclick()));
         w.writeText(label, null);
         w.endElement("button");
     }

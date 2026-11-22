@@ -19,7 +19,7 @@ public class DsfrButton extends UICommand implements ClientBehaviorHolder {
 
     private static final Collection<String> EVENT_NAMES = List.of("action", "click", "focus", "blur");
 
-    enum PropertyKeys { type, priority, size, icon, iconPosition, title, disabled, styleClass }
+    enum PropertyKeys { type, priority, size, icon, iconPosition, title, disabled, styleClass, onclick }
 
     public DsfrButton() {
         setRendererType(RENDERER_TYPE);
@@ -102,5 +102,14 @@ public class DsfrButton extends UICommand implements ClientBehaviorHolder {
 
     public void setStyleClass(String styleClass) {
         getStateHelper().put(PropertyKeys.styleClass, styleClass);
+    }
+
+    /** JavaScript run on click, before any ajax behavior; returning false cancels the action. */
+    public String getOnclick() {
+        return (String) getStateHelper().eval(PropertyKeys.onclick);
+    }
+
+    public void setOnclick(String onclick) {
+        getStateHelper().put(PropertyKeys.onclick, onclick);
     }
 }

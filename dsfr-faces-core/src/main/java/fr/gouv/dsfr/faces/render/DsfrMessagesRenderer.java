@@ -1,6 +1,7 @@
 package fr.gouv.dsfr.faces.render;
 
 import fr.gouv.dsfr.faces.component.DsfrMessages;
+import fr.gouv.dsfr.faces.util.Components;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIMessages;
@@ -72,7 +73,7 @@ public class DsfrMessagesRenderer extends DsfrRendererBase {
         }
         String forId = messages.getFor();
         if (!isBlank(forId)) {
-            UIComponent target = messages.findComponent(forId);
+            UIComponent target = Components.find(context, messages, forId);
             return target == null ? List.of() : context.getMessageList(target.getClientId(context));
         }
         return context.getMessageList();

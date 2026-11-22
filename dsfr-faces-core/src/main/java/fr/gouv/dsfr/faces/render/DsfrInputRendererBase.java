@@ -105,29 +105,6 @@ public abstract class DsfrInputRendererBase extends DsfrRendererBase {
         w.endElement("label");
     }
 
-    /**
-     * {@code <div class="fr-messages-group" id=".." aria-live="polite"><p class="fr-message fr-message--error">..</p></div>}
-     * <p>
-     * Always rendered, even when empty: the live region must exist before its content changes.
-     */
-    protected static void writeMessagesGroup(ResponseWriter w, String messagesId, List<FacesMessage> messages)
-            throws IOException {
-        w.startElement("div", null);
-        w.writeAttribute("class", "fr-messages-group", null);
-        w.writeAttribute("id", messagesId, null);
-        w.writeAttribute("aria-live", "polite", null);
-        int i = 0;
-        for (FacesMessage message : messages) {
-            w.startElement("p", null);
-            w.writeAttribute("class", "fr-message fr-message--" + severity(message), null);
-            w.writeAttribute("id", messagesId + "-" + i++, null);
-            w.writeText(text(message), null);
-            w.endElement("p");
-            message.rendered();
-        }
-        w.endElement("div");
-    }
-
     /** DSFR group modifier: error if any error message (or invalid), info if only info messages. */
     protected static String groupState(UIInput input, List<FacesMessage> messages) {
         if (!input.isValid() || hasError(messages)) {

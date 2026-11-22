@@ -13,10 +13,24 @@ dsfr-faces/
 │   └── fr.gouv.dsfr.faces
 │       ├── Dsfr                       constantes, URL des ressources, version
 │       ├── component/                 UIComponent (état via StateHelper)
-│       └── render/                    Renderers
-│           ├── DsfrRendererBase       comportements client (f:ajax), sévérités, utilitaires
-│           └── DsfrInputRendererBase  décodage, conversion, libellé, groupe de messages
-└── dsfr-faces-showcase/     WAR de démonstration
+│       ├── render/                    Renderers
+│       │   ├── DsfrRendererBase       comportements client (f:ajax), sévérités, groupe de messages
+│       │   └── DsfrInputRendererBase  décodage, conversion, libellé
+│       ├── ajax/                      PartialViewContext : ajaxRendered, limitRender
+│       └── util/Components            recherche d'identifiants à la RichFaces
+├── dsfr-faces-richfaces-compat/   taglibs aux URI RichFaces (rich, a4j), sans jar RichFaces
+│   ├── META-INF/rich.taglib.xml   http://richfaces.org/rich : balises + fonctions EL
+│   ├── META-INF/a4j.taglib.xml    http://richfaces.org/a4j
+│   └── fr.gouv.dsfr.faces.richfaces
+│       ├── A4jAjaxHandler, A4jCommandHandler, AjaxSupport   a4j: -> AjaxBehavior standard
+│       ├── RichAjaxBehavior       AjaxBehavior + recherche d'identifiants dans toute la vue
+│       ├── RichFunctions          fonctions EL rich:*
+│       └── AutoHeadListener       ajoute dsfr:head aux vues qui n'en ont pas
+├── dsfr-faces-showcase/     WAR de démonstration
+│   └── src/main/richfaces/  page RichFaces d'origine, migrée par le sed au build -> /richfaces/
+├── scripts/migrate-richfaces.sh   le sed de migration
+├── compose.yml              tests d'intégration : GlassFish + Playwright
+└── e2e/                     tests Playwright
 ```
 
 ## Choix techniques
@@ -38,7 +52,17 @@ Les CSS du DSFR référencent polices et icônes par des `url(...)` relatives. L
 ### Ajax standard
 
 Pas de couche ajax maison : les composants implémentent `ClientBehaviorHolder` et acceptent `<f:ajax>`.
-La compatibilité `a4j:` (voir [migration](migration-richfaces.md)) sera construite au-dessus de `f:ajax`.
+La compatibilité `a4j:` (voir [migration](migration-richfaces.md)) est construite au-dessus du même
+`AjaxBehavior` que `f:ajax` : le script client est produit par l'implémentation Faces.
+
+### `ajaxRendered` par un PartialViewContext
+
+`DsfrPartialViewContextFactory` (déclaré dans le `faces-config.xml` du cœur) enveloppe le
+`PartialViewContext` de l'implémentation. Au rendu d'une réponse ajax, il parcourt l'arbre
+(`SKIP_UNRENDERED`, `SKIP_ITERATION`) et ajoute à `getRenderIds()` les composants dont l'attribut
+`ajaxRendered` vaut `true`, sauf ceux déjà contenus dans une zone rafraîchie. L'attribut de composant
+`fr.gouv.dsfr.limitRender.<événement>` (posé par `limitRender` des balises `a4j:`) désactive ce
+mécanisme pour la requête.
 
 ### Indépendance vis-à-vis du serveur
 

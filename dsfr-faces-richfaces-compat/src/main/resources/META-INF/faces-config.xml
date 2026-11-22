@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Declared as 4.0 on purpose, like dsfr-faces-core: runs on Faces 4.0 and 4.1. -->
+<faces-config xmlns="https://jakarta.ee/xml/ns/jakartaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd"
+              version="4.0">
+    <name>dsfr_faces_richfaces</name>
+    <ordering>
+        <after><name>dsfr_faces</name></after>
+    </ordering>
+    <application>
+        <!-- Adds the DSFR head resources to views without dsfr:head (disable: fr.gouv.dsfr.richfaces.AUTO_HEAD=false) -->
+        <system-event-listener>
+            <system-event-listener-class>fr.gouv.dsfr.faces.richfaces.AutoHeadListener</system-event-listener-class>
+            <system-event-class>jakarta.faces.event.PreRenderViewEvent</system-event-class>
+            <source-class>jakarta.faces.component.UIViewRoot</source-class>
+        </system-event-listener>
+    </application>
+</faces-config>

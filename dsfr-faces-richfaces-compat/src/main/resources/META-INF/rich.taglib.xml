@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    RichFaces "rich" tag library, served at the RichFaces URI so that pages migrated with
+    sed 's/\<rich:/dsfr:/g' (xmlns:dsfr="http://richfaces.org/rich") resolve here.
+    Tags map to dsfr-faces components. Undeclared RichFaces attributes are accepted and ignored.
+-->
+<facelet-taglib xmlns="https://jakarta.ee/xml/ns/jakartaee"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facelettaglibrary_4_0.xsd"
+                version="4.0">
+    <description>dsfr-faces: RichFaces compatibility (rich:*)</description>
+    <namespace>http://richfaces.org/rich</namespace>
+    <short-name>rich</short-name>
+
+    <!-- ================================================================ EL functions -->
+    <function>
+        <description>Client id of the component with this id (RichFaces lookup).</description>
+        <function-name>clientId</function-name>
+        <function-class>fr.gouv.dsfr.faces.richfaces.RichFunctions</function-class>
+        <function-signature>java.lang.String clientId(java.lang.String)</function-signature>
+    </function>
+    <function>
+        <description>JavaScript: RichFaces.component('clientId').</description>
+        <function-name>component</function-name>
+        <function-class>fr.gouv.dsfr.faces.richfaces.RichFunctions</function-class>
+        <function-signature>java.lang.String component(java.lang.String)</function-signature>
+    </function>
+    <function>
+        <description>JavaScript: document.getElementById('clientId').</description>
+        <function-name>element</function-name>
+        <function-class>fr.gouv.dsfr.faces.richfaces.RichFunctions</function-class>
+        <function-signature>java.lang.String element(java.lang.String)</function-signature>
+    </function>
+    <function>
+        <description>The UIComponent with this id (RichFaces lookup).</description>
+        <function-name>findComponent</function-name>
+        <function-class>fr.gouv.dsfr.faces.richfaces.RichFunctions</function-class>
+        <function-signature>jakarta.faces.component.UIComponent findComponent(java.lang.String)</function-signature>
+    </function>
+    <function>
+        <description>True if the user has one of the roles (collection or comma separated string).</description>
+        <function-name>isUserInRole</function-name>
+        <function-class>fr.gouv.dsfr.faces.richfaces.RichFunctions</function-class>
+        <function-signature>boolean isUserInRole(java.lang.Object)</function-signature>
+    </function>
+    <function>
+        <description>CSS selector #clientId, escaped for a JavaScript string.</description>
+        <function-name>jQuerySelector</function-name>
+        <function-class>fr.gouv.dsfr.faces.richfaces.RichFunctions</function-class>
+        <function-signature>java.lang.String jQuerySelector(java.lang.String)</function-signature>
+    </function>
+
+    <!-- ================================================================ messages -->
+    <tag>
+        <description>rich:messages as DSFR alerts (dsfr:messages). ajaxRendered by default.</description>
+        <tag-name>messages</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Messages</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>globalOnly</name><type>boolean</type></attribute>
+        <attribute><name>for</name><type>java.lang.String</type></attribute>
+        <attribute><name>showSummary</name><type>boolean</type></attribute>
+        <attribute><name>showDetail</name><type>boolean</type></attribute>
+        <attribute><name>ajaxRendered</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ message -->
+    <tag>
+        <description>rich:message as DSFR inline messages (dsfr:message). ajaxRendered by default.</description>
+        <tag-name>message</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Message</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>for</name><required>true</required><type>java.lang.String</type></attribute>
+        <attribute><name>ajaxRendered</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+</facelet-taglib>

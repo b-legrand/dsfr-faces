@@ -16,9 +16,17 @@ find src/main/webapp -name '*.xhtml' -exec sed -i \
 - `\<` (début de mot, GNU sed) évite de toucher un mot qui se terminerait par `rich:` (p. ex.
   `enrich:`). Sur macOS (BSD sed), utiliser `gsed`, ou `[[:<:]]` à la place de `\<`.
 
-Pour que cette commande suffise, dsfr-faces doit fournir une **couche de compatibilité RichFaces** :
-mêmes noms de balises, mêmes attributs, mêmes fonctions EL, même API JavaScript de base, mais un rendu
-DSFR. Cette couche n'existe pas encore : voir la [feuille de route](roadmap.md), phase 1.
+Le script [`scripts/migrate-richfaces.sh`](../scripts/migrate-richfaces.sh) applique exactement cette
+commande à un dossier.
+
+Pour que cette commande suffise, dsfr-faces fournit une **couche de compatibilité RichFaces**, le module
+`dsfr-faces-richfaces-compat` : mêmes noms de balises, mêmes attributs, mêmes fonctions EL, mais un rendu
+DSFR. Elle est encore partielle (voir [l'état du module](#module-de-compatibilité-dsfr-faces-richfaces-compat)
+et la [feuille de route](roadmap.md), phase 1).
+
+Démonstration : le showcase contient une page RichFaces d'origine
+(`dsfr-faces-showcase/src/main/richfaces/inscription.xhtml`). Le build la migre avec le script et la
+publie sous `/richfaces/inscription.xhtml`, et les tests Playwright vérifient qu'elle fonctionne.
 
 ## Ce que fait réellement le `sed`
 
@@ -80,12 +88,82 @@ RichFaces 4.5 cible JSF 2.x (`javax.faces`), alors que dsfr-faces cible Jakarta 
 | Étape | Outil | Remarque |
 |---|---|---|
 | Passer de `javax.*` à `jakarta.*` (Java, `web.xml`, `faces-config.xml`, `beans.xml`) | OpenRewrite (`org.openrewrite.java.migrate.jakarta.JakartaEE10`) ou Eclipse Transformer | Les `.xhtml` ne sont presque pas concernés |
-| Remplacer les dépendances RichFaces par `dsfr-faces-core` (+ compatibilité) | `pom.xml` | |
+| **Retirer les jars RichFaces** et ajouter `dsfr-faces-richfaces-compat` (qui tire `dsfr-faces-core`) | `pom.xml` | voir [pourquoi](#pourquoi-retirer-richfaces) |
 | Remplacer les managed beans JSF (`@ManagedBean`, supprimés dans Faces 4.0) | CDI `@Named` + scopes CDI | OpenRewrite propose une recette |
 | Retirer les paramètres `org.richfaces.*` du `web.xml` | à la main | skin, `enableControlSkinning`, push… |
 | Adapter le code Java qui utilise l'API RichFaces | à la main | `org.richfaces.model.*` (`SortOrder`, `ExtendedDataModel`, `Filter`), `UIDataTable`, `ExtendedDataTableState`… |
 | Remplacer les usages de skin dans les pages ou CSS (`#{richSkin.*}`, `#{a4jSkin.*}`) | à la main | variables CSS du DSFR |
 | Remplacer le CSS spécifique (`.rf-*`, `.rich-*`) | à la main | ne s'applique plus |
+
+### Pourquoi retirer RichFaces
+
+On ne peut pas garder RichFaces pour `a4j:` (ni pour le reste) sous Jakarta Faces 4.1 :
+
+- **Plus maintenu, et en `javax`.** Les dernières versions sont `org.richfaces` 4.5.17.Final (juin 2016)
+  et la reprise communautaire `com.github.albfernandez.richfaces` 4.6.21.ayg (janvier 2023). Les deux
+  sont compilées pour `javax.faces` (JSF 2.x, Java 8).
+- **JavaScript incompatible.** Même convertie en `jakarta` (Eclipse Transformer), la partie JS appelle
+  `jsf.ajax`, supprimé par Faces 4.0 (remplacé par `faces.js` / `faces.ajax`).
+- **Conflit d'URI.** Le jar RichFaces déclare lui-même `http://richfaces.org/a4j` et
+  `http://richfaces.org/rich`, les URI que reprend la couche de compatibilité.
+- **Mélange de styles.** Il ramènerait jQuery 1.x et les skins RichFaces (`rf-*`) à côté du DSFR.
+
+`a4j:` n'est pas réécrit pour autant : la couche de compatibilité délègue à l'ajax standard de Faces
+(`AjaxBehavior`, celui de `f:ajax`), avec les valeurs par défaut de RichFaces.
+
+## Module de compatibilité `dsfr-faces-richfaces-compat`
+
+```xml
+<dependency>
+  <groupId>fr.gouv.dsfr</groupId>
+  <artifactId>dsfr-faces-richfaces-compat</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+### Ce qui est pris en charge
+
+| Élément | Comportement |
+|---|---|
+| `rich:messages` | `dsfr:messages` (alertes DSFR), `ajaxRendered` par défaut |
+| `rich:message` | `dsfr:message` (`fr-messages-group`), `ajaxRendered` par défaut |
+| `a4j:ajax` | `AjaxBehavior` standard sur le composant parent. Prend en charge `event` (par défaut, l'événement par défaut du parent), `execute` (par défaut `@this`), `render`, `listener` (avec ou sans `AjaxBehaviorEvent`), `disabled`, `immediate`, `resetValues`, `limitRender`, `onbegin`, `onbeforedomupdate`, `oncomplete`, `onerror` et `delay` |
+| `a4j:commandButton` | `dsfr:button` avec ajax sur `action`. `execute` vaut `@form` par défaut ; `render`, `oncomplete`, `limitRender`… comme pour `a4j:ajax`. `onclick` est exécuté avant la requête (`return confirm(…)` l'annule). |
+| Fonctions EL | `clientId`, `component`, `element`, `findComponent`, `isUserInRole` et `jQuerySelector` |
+| En-tête | Les ressources DSFR (`dsfr:head`) sont ajoutées automatiquement au `h:head` des vues qui n'ont pas de `dsfr:head`, comme RichFaces injectait les siennes |
+
+Détails :
+
+- **Recherche des identifiants à la RichFaces.** Pour `render`, `execute`, `for` et les fonctions EL, la
+  recherche est relative au composant, puis s'étend aux conteneurs de nommage englobants, puis à toute
+  la vue. Ainsi `render="resume"` trouve un composant situé hors du formulaire, ce que `f:ajax` refuse.
+- **`render` et `execute`** acceptent des identifiants séparés par des espaces ou des virgules, ou une
+  expression EL.
+- **`oncomplete`** s'exécute après la mise à jour du DOM (statut `success` de `faces.ajax`), y compris
+  quand la validation échoue, comme dans RichFaces. Les expressions EL dans ces scripts sont évaluées.
+- **`ajaxRendered`** : à chaque requête ajax, les composants `ajaxRendered` sont ajoutés aux zones
+  rafraîchies, sauf si la requête rafraîchit `@all`, si le composant est déjà dans une zone rafraîchie,
+  ou si la source porte `limitRender="true"`. Tout composant peut s'y inscrire avec
+  `ajaxRendered="true"`.
+- **Désactiver l'injection de l'en-tête** :
+
+  ```xml
+  <context-param>
+    <param-name>fr.gouv.dsfr.richfaces.AUTO_HEAD</param-name>
+    <param-value>false</param-value>
+  </context-param>
+  ```
+
+  Ajouter alors `<dsfr:head/>` aux gabarits.
+
+### Pas encore pris en charge
+
+- La forme englobante de `a4j:ajax` (`<a4j:ajax>` autour de composants) : seule la forme imbriquée dans
+  un composant fonctionne.
+- `status`, `bypassUpdates`, `data`, `focus` et `requestGroupingId` sont acceptés mais ignorés.
+- `#{rich:component('x')}` produit `RichFaces.component('…')`, mais l'objet JS `RichFaces` n'existe pas
+  encore : il viendra avec `rich:popupPanel`.
+- Toutes les autres balises `rich:` et `a4j:` (voir les tableaux ci-dessous).
 
 ## Inventaire avant migration
 
@@ -101,8 +179,8 @@ grep -rnoE 'RichFaces\.[a-zA-Z.$]+' src/main/webapp
 grep -rnoE '(richSkin|a4jSkin)\.[a-zA-Z]+|\.(rf|rich)-[a-z-]+' src/main/webapp
 ```
 
-Un futur script `dsfr-faces-migrate` (feuille de route, phase 1) produira ce rapport et signalera les
-balises ou attributs sans équivalent.
+`scripts/migrate-richfaces.sh` n'applique pour l'instant que le `sed`. Une version complète (feuille de
+route, phase 1) produira aussi ce rapport et signalera les balises ou attributs sans équivalent.
 
 ## Correspondances `rich:` → DSFR
 
@@ -114,8 +192,8 @@ Légende de priorité :
 
 | Balise RichFaces 4.5 | Composant DSFR | Prio. | Remarques |
 |---|---|---|---|
-| `rich:messages` | Alerte (`fr-alert`) | P1 | `dsfr:messages` existe. Il reste à le rendre `ajaxRendered` par défaut, comme RichFaces. |
-| `rich:message` | Message de champ (`fr-message`) | P1 | |
+| `rich:messages` | Alerte (`fr-alert`) | P1 | ✅ `dsfr:messages`, `ajaxRendered` par défaut |
+| `rich:message` | Message de champ (`fr-message`) | P1 | ✅ `dsfr:message`, `ajaxRendered` par défaut |
 | `rich:dataTable`, `rich:column` | Tableau (`fr-table`) | P1 | `sortBy`, `sortOrder`, `filterValue`, `rows`, `rowClasses`… |
 | `rich:dataScroller` | Pagination (`fr-pagination`) | P1 | lié à la table par `for` |
 | `rich:panel` | Carte (`fr-card`) ou section avec titre | P1 | rendu à arbitrer : facette `header` → titre |
@@ -155,10 +233,10 @@ Légende de priorité :
 
 | Balise | Implémentation prévue | Prio. |
 |---|---|---|
-| `a4j:ajax` | gestionnaire de balise délégant à `f:ajax` (`render`, `execute`, `oncomplete`, `onbegin`, `listener`, `limitRender`, `status`) | P1 |
-| `a4j:commandButton` | bouton DSFR + ajax implicite | P1 |
+| `a4j:ajax` | ✅ `AjaxBehavior` standard (celui de `f:ajax`) ; `status` ignoré, pas de forme englobante | P1 |
+| `a4j:commandButton` | ✅ bouton DSFR + ajax implicite (`execute="@form"`) | P1 |
 | `a4j:commandLink` | lien DSFR (`fr-link`) + ajax implicite | P1 |
-| `a4j:outputPanel` | `div`/`span` ; `ajaxRendered="true"` rafraîchi à chaque requête ajax | P1 |
+| `a4j:outputPanel` | `div`/`span` ; `ajaxRendered="true"` (le mécanisme existe déjà dans le cœur) | P1 |
 | `a4j:repeat` | `ui:repeat` | P1 |
 | `a4j:jsFunction` | `h:commandScript` (Faces 2.3+) | P1 |
 | `a4j:status` | indicateur via `faces.ajax.addOnEvent` | P2 |
@@ -173,7 +251,9 @@ Légende de priorité :
 ## Les composants `h:` standard
 
 Le `sed` ne touche pas `h:inputText`, `h:selectOneMenu`, `h:commandButton`, `h:dataTable`… alors qu'ils
-sont majoritaires dans les pages RichFaces. Un module optionnel **`dsfr-faces-html`** (feuille de
+sont majoritaires dans les pages RichFaces. Sans traitement, c'est pire qu'un rendu brut : la remise à zéro
+CSS du DSFR retire la bordure des champs natifs, qui deviennent **invisibles** (constaté sur la page de
+démonstration). Un module optionnel **`dsfr-faces-html`** (feuille de
 route, phase 2) remplacera les renderers du kit `HTML_BASIC` pour leur appliquer les classes DSFR
 (`fr-input`, `fr-select`, `fr-btn`, `fr-label`, `fr-table`…).
 
@@ -183,10 +263,12 @@ présentables, et le passage aux balises `dsfr:` reste recommandé pour la confo
 
 ## Comportements RichFaces implicites à reproduire
 
-- `rich:messages` et `rich:message` sont rafraîchis à **chaque** requête ajax (`ajaxRendered`), sans
+- ✅ `rich:messages` et `rich:message` sont rafraîchis à **chaque** requête ajax (`ajaxRendered`), sans
   `render` explicite. Sans ce comportement, une application migrée perdrait ses messages d'erreur ajax.
-- `a4j:commandButton` et `a4j:commandLink` sont ajax par défaut avec `execute="@form"`.
-- `render` accepte des identifiants séparés par des virgules et des expressions EL.
+- ✅ `a4j:commandButton` est ajax par défaut avec `execute="@form"` (`a4j:commandLink` reste à faire).
+- ✅ `render` accepte des identifiants séparés par des virgules et des expressions EL, et trouve les
+  composants dans toute la vue.
+- ✅ Les ressources RichFaces étaient injectées automatiquement : les ressources DSFR le sont aussi.
 - `#{rich:component('id')}` renvoie un objet JS avec `show()`, `hide()`, `switchToItem()`… Une petite
   API `RichFaces.component(id)` sera fournie au-dessus du JS du DSFR (`dsfr(el).modal.disclose()`…).
 

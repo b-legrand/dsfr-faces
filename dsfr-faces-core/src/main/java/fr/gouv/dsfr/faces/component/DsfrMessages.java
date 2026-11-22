@@ -10,7 +10,8 @@ import java.util.Set;
  * Replaces {@code rich:messages} / {@code h:messages}. Inherits {@code globalOnly}, {@code for},
  * {@code showSummary}, {@code showDetail} and {@code redisplay} from {@link UIMessages}.
  * <p>
- * The wrapper {@code div} is always rendered so it can be an ajax {@code render} target.
+ * The wrapper {@code div} is always rendered so it can be an ajax {@code render} target, and it is
+ * {@code ajaxRendered} by default (refreshed on every ajax request, as {@code rich:messages}).
  */
 @FacesComponent(DsfrMessages.COMPONENT_TYPE)
 public class DsfrMessages extends UIMessages {
@@ -20,7 +21,7 @@ public class DsfrMessages extends UIMessages {
 
     private static final Set<String> TITLE_TAGS = Set.of("h2", "h3", "h4", "h5", "h6", "p");
 
-    enum PropertyKeys { titleTag, styleClass }
+    enum PropertyKeys { titleTag, styleClass, ajaxRendered }
 
     public DsfrMessages() {
         setRendererType(RENDERER_TYPE);
@@ -42,5 +43,14 @@ public class DsfrMessages extends UIMessages {
 
     public void setStyleClass(String styleClass) {
         getStateHelper().put(PropertyKeys.styleClass, styleClass);
+    }
+
+    /** Re-rendered by every ajax request. Default true. */
+    public boolean isAjaxRendered() {
+        return (Boolean) getStateHelper().eval(PropertyKeys.ajaxRendered, Boolean.TRUE);
+    }
+
+    public void setAjaxRendered(boolean ajaxRendered) {
+        getStateHelper().put(PropertyKeys.ajaxRendered, ajaxRendered);
     }
 }

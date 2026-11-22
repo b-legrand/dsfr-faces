@@ -88,6 +88,32 @@ public abstract class DsfrRendererBase extends Renderer {
         return isBlank(message.getDetail()) ? message.getSummary() : message.getDetail();
     }
 
+    /**
+     * {@code <div class="fr-messages-group" id=".." aria-live="polite"><p class="fr-message fr-message--error">..</p></div>}
+     * <p>
+     * Always rendered, even when empty: the live region must exist before its content changes, and the
+     * element must exist to be an ajax render target.
+     *
+     * @param component component receiving pass-through attributes, or {@code null}
+     */
+    protected static void writeMessagesGroup(ResponseWriter w, UIComponent component, String messagesId,
+                                             String styleClass, List<FacesMessage> messages) throws IOException {
+        w.startElement("div", component);
+        w.writeAttribute("class", classes("fr-messages-group", styleClass), null);
+        w.writeAttribute("id", messagesId, null);
+        w.writeAttribute("aria-live", "polite", null);
+        int i = 0;
+        for (FacesMessage message : messages) {
+            w.startElement("p", null);
+            w.writeAttribute("class", "fr-message fr-message--" + severity(message), null);
+            w.writeAttribute("id", messagesId + "-" + i++, null);
+            w.writeText(text(message), null);
+            w.endElement("p");
+            message.rendered();
+        }
+        w.endElement("div");
+    }
+
     // ------------------------------------------------------------------ client behaviors (f:ajax)
 
     /**
@@ -121,12 +147,29 @@ public abstract class DsfrRendererBase extends Renderer {
      */
     protected static void renderBehaviors(FacesContext context, UIComponent component, String sourceId,
                                           Map<String, String> domEvents, boolean preventSubmit) throws IOException {
-        if (!(component instanceof ClientBehaviorHolder holder) || holder.getClientBehaviors().isEmpty()) {
-            return;
-        }
+        renderBehaviors(context, component, sourceId, domEvents, preventSubmit, Map.of());
+    }
+
+    /**
+     * Same as {@link #renderBehaviors(FacesContext, UIComponent, String, Map, boolean)}, with user scripts
+     * (e.g. an {@code onclick} attribute) run before the behaviors. A user script returning {@code false}
+     * cancels the behaviors, as with RichFaces ({@code onclick="return confirm('…')"}).
+     *
+     * @param userScripts DOM event name (click, change...) to user JavaScript
+     */
+    protected static void renderBehaviors(FacesContext context, UIComponent component, String sourceId,
+                                          Map<String, String> domEvents, boolean preventSubmit,
+                                          Map<String, String> userScripts) throws IOException {
         Map<String, List<String>> scripts = new LinkedHashMap<>();
+        userScripts.forEach((dom, js) -> {
+            if (!isBlank(js)) {
+                scripts.computeIfAbsent(dom, k -> new ArrayList<>()).add(js);
+            }
+        });
         Set<String> submitting = new HashSet<>();
-        for (Map.Entry<String, List<ClientBehavior>> entry : holder.getClientBehaviors().entrySet()) {
+        Map<String, List<ClientBehavior>> behaviors = component instanceof ClientBehaviorHolder holder
+                ? holder.getClientBehaviors() : Map.of();
+        for (Map.Entry<String, List<ClientBehavior>> entry : behaviors.entrySet()) {
             String logical = entry.getKey();
             String dom = domEvents.getOrDefault(logical, logical);
             ClientBehaviorContext bc = ClientBehaviorContext.createClientBehaviorContext(

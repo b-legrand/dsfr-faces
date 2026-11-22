@@ -10,6 +10,10 @@ Les exemples de HTML généré supposent `jakarta.faces.SEPARATOR_CHAR` = `-` et
 | [`dsfr:inputText`](#dsfrinputtext) | Champ de saisie | `h:inputText` + `rich:message`, `rich:calendar` (`type="date"`) |
 | [`dsfr:button`](#dsfrbutton) | Bouton | `h:commandButton`, `a4j:commandButton` (avec `f:ajax`) |
 | [`dsfr:messages`](#dsfrmessages) | Alerte | `rich:messages`, `h:messages` |
+| [`dsfr:message`](#dsfrmessage) | Messages de champ | `rich:message`, `h:message` |
+
+Les balises `rich:` et `a4j:` des pages migrées sont décrites dans
+[migration-richfaces.md](migration-richfaces.md#module-de-compatibilité-dsfr-faces-richfaces-compat).
 
 ---
 
@@ -91,6 +95,7 @@ Bouton lié à une action. Étend `UICommand` : `action`, `actionListener`, `imm
 | `icon` | | Classe d'icône DSFR, p. ex. `fr-icon-send-plane-line`. |
 | `iconPosition` | `left` | `left`, `right`, `only`. Avec `only`, le libellé sert de `title`. |
 | `title`, `disabled`, `styleClass` | | |
+| `onclick` | | JavaScript exécuté avant les comportements ajax ; s'il renvoie `false`, l'action est annulée (`return confirm('…')`). |
 
 Événements `f:ajax` : `action` (par défaut, déclenché sur `click`), `click`, `focus`, `blur`.
 
@@ -119,6 +124,7 @@ Messages Faces sous forme d'alertes DSFR. Étend `UIMessages`.
 | `redisplay` | `true` | Réaffiche les messages déjà rendus ailleurs. |
 | `titleTag` | `h3` | Balise du titre d'alerte (`h2` à `h6` ou `p`), pour respecter la hiérarchie des titres (RGAA 9.1). |
 | `styleClass` | | Classes du conteneur. |
+| `ajaxRendered` | `true` | Rafraîchi à chaque requête ajax, sans figurer dans `render` (comme `rich:messages`). |
 
 - Le résumé et le détail sont différents : alerte avec titre (`fr-alert__title`) et paragraphe.
 - Sinon : alerte compacte (`fr-alert--sm`).
@@ -136,3 +142,37 @@ Messages Faces sous forme d'alertes DSFR. Étend `UIMessages`.
   </div>
 </div>
 ```
+
+---
+
+## `dsfr:message`
+
+Messages d'un seul composant, sous forme de messages DSFR en ligne. Étend `UIMessage`. Sert à côté d'un
+champ qui n'est pas un composant DSFR (p. ex. `h:inputText`) : les champs `dsfr:` affichent déjà leurs
+propres messages.
+
+| Attribut | Défaut | Description |
+|---|---|---|
+| `for` | (obligatoire) | Identifiant du composant. Recherche à la RichFaces : relative, puis conteneurs de nommage englobants, puis toute la vue. |
+| `redisplay` | `true` | Réaffiche les messages déjà rendus ailleurs. |
+| `ajaxRendered` | `true` | Rafraîchi à chaque requête ajax, sans figurer dans `render` (comme `rich:message`). |
+| `styleClass` | | Classes ajoutées à `fr-messages-group`. |
+
+```html
+<div class="fr-messages-group" id="signup-loginMessage" aria-live="polite">
+  <p class="fr-message fr-message--error" id="signup-loginMessage-0">Identifiant : erreur de validation…</p>
+</div>
+```
+
+Le conteneur est toujours rendu (zone `aria-live` présente avant l'arrivée des messages, cible `render`
+valide).
+
+---
+
+## `ajaxRendered`
+
+Tout composant dont l'attribut `ajaxRendered` vaut `true` est rafraîchi à chaque requête ajax, en plus des
+zones indiquées par `render`. C'est le comportement par défaut de `dsfr:messages` et `dsfr:message`.
+Il ne s'applique pas si la requête rafraîchit `@all`, si le composant est déjà dans une zone rafraîchie,
+ou si la source de la requête porte `limitRender="true"` (`a4j:`).
+

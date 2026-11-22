@@ -27,9 +27,75 @@
             <groupId>fr.gouv.dsfr</groupId>
             <artifactId>dsfr-faces-core</artifactId>
         </dependency>
+        <!-- Replaces the RichFaces jars for the migrated page under /richfaces/ -->
+        <dependency>
+            <groupId>fr.gouv.dsfr</groupId>
+            <artifactId>dsfr-faces-richfaces-compat</artifactId>
+        </dependency>
     </dependencies>
+
+    <properties>
+        <richfaces.migrated>${project.build.directory}/richfaces-migrated</richfaces.migrated>
+    </properties>
 
     <build>
         <finalName>dsfr-faces-showcase</finalName>
+        <plugins>
+            <!--
+                Migration demo: the original RichFaces pages (src/main/richfaces) are copied, migrated with
+                scripts/migrate-richfaces.sh (the sed of the README, GNU sed required) and published under
+                /richfaces/ in the WAR. Skip with -Dexec.skip (the pages are then served unmigrated and fail).
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-richfaces-pages</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${richfaces.migrated}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/richfaces</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>migrate-richfaces-pages</id>
+                        <phase>process-resources</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>${project.basedir}/../scripts/migrate-richfaces.sh</argument>
+                                <argument>${richfaces.migrated}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>${richfaces.migrated}</directory>
+                            <targetPath>richfaces</targetPath>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

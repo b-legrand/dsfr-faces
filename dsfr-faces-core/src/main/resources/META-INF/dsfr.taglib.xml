@@ -133,6 +133,10 @@
         <attribute><name>title</name><type>java.lang.String</type></attribute>
         <attribute><name>disabled</name><type>boolean</type></attribute>
         <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute>
+            <description>JavaScript run on click, before any ajax behavior; returning false cancels the action.</description>
+            <name>onclick</name><type>java.lang.String</type>
+        </attribute>
     </tag>
 
     <!-- ================================================================ messages -->
@@ -159,6 +163,32 @@
         <attribute>
             <description>Element for alert titles: h2..h6 or p. Default h3.</description>
             <name>titleTag</name><type>java.lang.String</type>
+        </attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute>
+            <description>Re-rendered by every ajax request, without being listed in render (as in RichFaces). Default true.</description>
+            <name>ajaxRendered</name><type>boolean</type>
+        </attribute>
+    </tag>
+
+    <!-- ================================================================ message -->
+    <tag>
+        <description>Messages of one component as DSFR inline messages (fr-messages-group), e.g. next to an h:inputText. Replaces rich:message / h:message.</description>
+        <tag-name>message</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Message</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute>
+            <description>Id of the component whose messages are shown. Resolved as in RichFaces: relative, then enclosing naming containers, then the whole view.</description>
+            <name>for</name><required>true</required><type>java.lang.String</type>
+        </attribute>
+        <attribute><name>redisplay</name><type>boolean</type></attribute>
+        <attribute>
+            <description>Re-rendered by every ajax request, without being listed in render (as in RichFaces). Default true.</description>
+            <name>ajaxRendered</name><type>boolean</type>
         </attribute>
         <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
     </tag>

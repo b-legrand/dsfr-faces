@@ -16,9 +16,11 @@ Les balises gardent leurs noms et leurs attributs RichFaces (`dsfr:dataTable`, `
 `dsfr:tabPanel`…), mais produisent du HTML DSFR accessible. Voir
 [docs/migration-richfaces.md](docs/migration-richfaces.md).
 
-> **État : v0.1, preuve de concept.** 4 composants (`head`, `inputText`, `button`, `messages`).
-> La couche de compatibilité RichFaces qui rend possible la migration par `sed` reste à écrire :
-> voir la [feuille de route](docs/roadmap.md).
+> **État : v0.1, preuve de concept.** 5 composants (`head`, `inputText`, `button`, `messages`,
+> `message`) et un premier noyau de compatibilité RichFaces (`rich:messages`, `rich:message`,
+> `a4j:ajax`, `a4j:commandButton`, fonctions EL). Le showcase contient une page RichFaces d'origine,
+> migrée par ce `sed` au build et vérifiée par des tests Playwright. Le reste est dans la
+> [feuille de route](docs/roadmap.md).
 
 ## Principes
 
@@ -47,7 +49,14 @@ docker run --rm --network host -u "$(id -u):$(id -g)" -v "$PWD":/src -w /src -e 
 ```
 
 Puis déployer `dsfr-faces-showcase/target/dsfr-faces-showcase.war` sur n'importe quel serveur
-Jakarta EE 11 (voir [docs/demarrage.md](docs/demarrage.md)).
+Jakarta EE 11, ou lancer le showcase et les tests d'intégration avec Docker Compose (voir
+[docs/demarrage.md](docs/demarrage.md)) :
+
+```sh
+docker compose up -d --build --wait showcase   # http://localhost:8080/dsfr-faces-showcase/
+docker compose up --build --abort-on-container-exit --exit-code-from e2e   # tests Playwright
+docker compose down
+```
 
 ```xml
 <html lang="fr" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
@@ -74,13 +83,15 @@ Jakarta EE 11 (voir [docs/demarrage.md](docs/demarrage.md)).
 |---|---|
 | `dsfr-faces-resources` | `dist/` du DSFR sous `META-INF/resources/dsfr`, servi statiquement à `/{contexte}/dsfr/...` |
 | `dsfr-faces-core` | Composants, renderers, `META-INF/dsfr.taglib.xml`. Dépend de `-resources`. |
-| `dsfr-faces-showcase` | WAR de démonstration, portable |
+| `dsfr-faces-richfaces-compat` | Taglibs aux URI RichFaces (`rich`, `a4j`) pour les pages migrées par `sed`. Remplace les jars RichFaces. |
+| `dsfr-faces-showcase` | WAR de démonstration, portable, avec une page RichFaces migrée au build |
+| `e2e/` + `compose.yml` | Tests d'intégration Playwright (GlassFish + Chromium et Firefox, dans Docker) |
 
 ## Documentation
 
 | Document | Contenu |
 |---|---|
-| [docs/demarrage.md](docs/demarrage.md) | Installation, configuration, build, essai du showcase |
+| [docs/demarrage.md](docs/demarrage.md) | Installation, configuration, build, showcase, tests d'intégration |
 | [docs/composants.md](docs/composants.md) | Référence des composants : attributs et HTML généré |
 | [docs/architecture.md](docs/architecture.md) | Choix techniques et conventions des renderers |
 | [docs/migration-richfaces.md](docs/migration-richfaces.md) | Stratégie de migration par `sed`, correspondances RichFaces → DSFR |

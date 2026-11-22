@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    RichFaces "a4j" tag library, served at the RichFaces URI (the sed does not touch a4j:).
+    Built on standard Faces ajax (jakarta.faces.component.behavior.AjaxBehavior, as f:ajax).
+    Undeclared RichFaces attributes are accepted and ignored.
+-->
+<facelet-taglib xmlns="https://jakarta.ee/xml/ns/jakartaee"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facelettaglibrary_4_0.xsd"
+                version="4.0">
+    <description>dsfr-faces: RichFaces compatibility (a4j:*)</description>
+    <namespace>http://richfaces.org/a4j</namespace>
+    <short-name>a4j</short-name>
+
+    <!-- ================================================================ ajax -->
+    <tag>
+        <description>Ajax behavior for the parent component (f:ajax with RichFaces attributes). execute defaults to @this.</description>
+        <tag-name>ajax</tag-name>
+        <handler-class>fr.gouv.dsfr.faces.richfaces.A4jAjaxHandler</handler-class>
+        <attribute><description>Event (default: the parent's default event).</description><name>event</name><type>java.lang.String</type></attribute>
+        <attribute><description>Ids or keywords to process. Default @this.</description><name>execute</name><type>java.lang.Object</type></attribute>
+        <attribute><description>Ids or keywords to render, searched in the whole view if needed. ajaxRendered components are added.</description><name>render</name><type>java.lang.Object</type></attribute>
+        <attribute><name>listener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><name>resetValues</name><type>boolean</type></attribute>
+        <attribute><description>Do not render ajaxRendered components.</description><name>limitRender</name><type>boolean</type></attribute>
+        <attribute><name>onbegin</name><type>java.lang.String</type></attribute>
+        <attribute><name>onbeforedomupdate</name><type>java.lang.String</type></attribute>
+        <attribute><name>oncomplete</name><type>java.lang.String</type></attribute>
+        <attribute><name>onerror</name><type>java.lang.String</type></attribute>
+        <attribute><name>delay</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ commandButton -->
+    <tag>
+        <description>Ajax DSFR button (dsfr:button + ajax on action). execute defaults to @form.</description>
+        <tag-name>commandButton</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Button</component-type>
+            <handler-class>fr.gouv.dsfr.faces.richfaces.A4jCommandHandler</handler-class>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>action</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>actionListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>onclick</name><type>java.lang.String</type></attribute>
+        <attribute><name>execute</name><type>java.lang.Object</type></attribute>
+        <attribute><name>render</name><type>java.lang.Object</type></attribute>
+        <attribute><name>limitRender</name><type>boolean</type></attribute>
+        <attribute><name>onbegin</name><type>java.lang.String</type></attribute>
+        <attribute><name>onbeforedomupdate</name><type>java.lang.String</type></attribute>
+        <attribute><name>oncomplete</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><description>dsfr-faces: primary (default), secondary, tertiary.</description><name>priority</name><type>java.lang.String</type></attribute>
+        <attribute><description>dsfr-faces: DSFR icon class.</description><name>icon</name><type>java.lang.String</type></attribute>
+    </tag>
+</facelet-taglib>

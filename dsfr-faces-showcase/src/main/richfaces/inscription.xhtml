@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+    Page RichFaces 4.5 d'origine, NON modifiée à la main.
+    Le build la copie dans target/richfaces-migrated puis lui applique scripts/migrate-richfaces.sh
+    (le sed du README) ; c'est la version migrée qui est publiée dans le WAR, sous /richfaces/.
+    Seul le jar RichFaces a été remplacé par dsfr-faces-richfaces-compat.
+-->
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="http://richfaces.org/a4j">
+<h:head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Inscription – page RichFaces migrée</title>
+</h:head>
+<h:body>
+    <main class="fr-container fr-my-6w" id="content" role="main">
+        <h1>Inscription</h1>
+        <p>Page RichFaces migrée par <code>sed</code>, sans autre modification.</p>
+
+        <h:form id="signup">
+            <rich:messages id="globalMessages" globalOnly="true" showDetail="true"/>
+
+            <div>
+                <h:outputLabel for="login" value="Identifiant"/>
+                <h:inputText id="login" value="#{signup.login}" required="true" label="Identifiant">
+                    <f:validateLength minimum="3" maximum="20"/>
+                    <!-- no render: rich:message is ajaxRendered -->
+                    <a4j:ajax event="blur"/>
+                </h:inputText>
+                <rich:message id="loginMessage" for="login"/>
+                <p>Identifiant client du champ :
+                    <h:outputText id="loginClientId" value="#{rich:clientId('login')}"/></p>
+            </div>
+
+            <div>
+                <h:outputLabel for="email" value="Adresse électronique"/>
+                <h:inputText id="email" value="#{signup.email}" required="true" label="Adresse électronique"/>
+                <rich:message id="emailMessage" for="email"/>
+            </div>
+
+            <!-- "summary" is outside the form: found in the whole view, as RichFaces did -->
+            <a4j:commandButton id="register" value="S'inscrire" action="#{signup.register}"
+                               render="summary"
+                               oncomplete="document.getElementById('status').textContent = 'Requête terminée';"/>
+        </h:form>
+
+        <h:panelGroup id="summary" layout="block">
+            <h:outputText value="Compte créé pour #{signup.login}." rendered="#{signup.registered}"/>
+        </h:panelGroup>
+        <p id="status"></p>
+    </main>
+</h:body>
+</html>

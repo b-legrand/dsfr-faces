@@ -1,0 +1,49 @@
+# Tests d'intégration du showcase (voir docs/demarrage.md, « Tests d'intégration »).
+#
+#   mvn clean package
+#   docker compose up --build --abort-on-container-exit --exit-code-from e2e
+#   docker compose down
+#
+# La version de l'image Playwright doit être celle de @playwright/test dans e2e/package.json :
+# e2e/scripts/check-playwright-version.mjs le vérifie avant chaque exécution des tests.
+name: dsfr-faces-e2e
+
+services:
+  # Showcase on GlassFish 8 (Jakarta EE 11 reference implementation, Mojarra 4.1).
+  # The library itself is server-agnostic: this only picks the test runtime.
+  # Not "app": .app is an HSTS-preloaded TLD, browsers would force https://app
+  showcase:
+    build:
+      context: ./dsfr-faces-showcase/target
+      dockerfile_inline: |
+        FROM ghcr.io/eclipse-ee4j/glassfish:8.0.5
+        # /deploy is the autodeploy directory of the image (GlassFish writes markers into it)
+        COPY --chown=glassfish:glassfish dsfr-faces-showcase.war /deploy/
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8080/dsfr-faces-showcase/"]
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 40
+
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.65.1-noble
+    depends_on:
+      showcase:
+        condition: service_healthy
+    # host user, so that node_modules and reports in e2e/ stay owned by you
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    ipc: host # recommended by Playwright for Chromium
+    working_dir: /e2e
+    environment:
+      HOME: /tmp
+      CI: ${CI:-}
+      BASE_URL: http://showcase:8080/dsfr-faces-showcase/
+      NPM_CONFIG_UPDATE_NOTIFIER: "false"
+    volumes:
+      - ./e2e:/e2e
+      # read by the version check (../compose.yml from /e2e)
+      - ./compose.yml:/compose.yml:ro
+    command: ["sh", "-c", "npm ci --no-audit --no-fund && npm test"]

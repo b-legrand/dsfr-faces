@@ -84,7 +84,7 @@ public class DsfrInputTextRenderer extends DsfrInputRendererBase {
         renderBehaviors(context, in, id, DOM_EVENTS, false);
         w.endElement("input");
 
-        writeMessagesGroup(w, messagesId, messages);
+        writeMessagesGroup(w, null, messagesId, null, messages);
         w.endElement("div");
     }
 }

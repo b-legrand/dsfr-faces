@@ -1,0 +1,14 @@
+{
+  "name": "dsfr-faces-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tests d'intégration du showcase dsfr-faces (Playwright, lancés par docker compose)",
+  "type": "module",
+  "scripts": {
+    "pretest": "node scripts/check-playwright-version.mjs",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1"
+  }
+}

@@ -8,4 +8,8 @@
               xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd"
               version="4.0">
     <name>dsfr_faces</name>
+    <factory>
+        <!-- ajaxRendered support (dsfr:messages, dsfr:message, ajaxRendered="true") -->
+        <partial-view-context-factory>fr.gouv.dsfr.faces.ajax.DsfrPartialViewContextFactory</partial-view-context-factory>
+    </factory>
 </faces-config>

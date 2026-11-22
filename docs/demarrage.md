@@ -7,6 +7,7 @@
 | Java | 17 ou plus (exigence de Jakarta EE 11) |
 | Maven | 3.9 |
 | Node.js / npm | inutile : le build télécharge sa propre version (voir ci-dessous) |
+| Docker + Compose | pour le showcase et les tests d'intégration ; GNU sed pour la page de migration du showcase (`gsed` sur macOS) |
 | Serveur | tout runtime Jakarta EE 11 (Web Profile suffit), ou un conteneur de servlets avec Faces 4.1 et CDI |
 
 ## Construire
@@ -60,6 +61,10 @@ docker run --rm --network host -u "$(id -u):$(id -g)" -v "$PWD":/src -w /src -e 
 
 `dsfr-faces-core` tire `dsfr-faces-resources` (les fichiers DSFR) de façon transitive.
 
+Pour une application RichFaces migrée par `sed`, dépendre plutôt de `dsfr-faces-richfaces-compat` (qui
+tire `dsfr-faces-core`) et retirer les jars RichFaces : voir
+[migration-richfaces.md](migration-richfaces.md#module-de-compatibilité-dsfr-faces-richfaces-compat).
+
 ### Configuration recommandée (`web.xml`)
 
 ```xml
@@ -109,27 +114,66 @@ initialise le thème (`data-fr-scheme`).
 ## Essayer le showcase
 
 Le WAR `dsfr-faces-showcase/target/dsfr-faces-showcase.war` se déploie sur n'importe quel serveur
-Jakarta EE 11. Exemple jetable avec GlassFish 8 (implémentation de référence, qui embarque Mojarra 4.1),
-sans rien ajouter au projet :
+Jakarta EE 11. Le plus simple est de lancer le service `showcase` de `compose.yml` (GlassFish 8.0.5,
+implémentation de référence, qui embarque Mojarra 4.1) :
 
 ```sh
-mkdir -p /tmp/dsfr-faces-deploy && chmod 777 /tmp/dsfr-faces-deploy
-cp dsfr-faces-showcase/target/dsfr-faces-showcase.war /tmp/dsfr-faces-deploy/
-docker run -d --name dsfr-faces-gf --network host \
-  -v /tmp/dsfr-faces-deploy:/deploy ghcr.io/eclipse-ee4j/glassfish:latest
+mvn clean package
+docker compose up -d --build --wait showcase
 # http://localhost:8080/dsfr-faces-showcase/
+# http://localhost:8080/dsfr-faces-showcase/richfaces/inscription.xhtml   (page RichFaces migrée)
+docker compose down
 ```
 
-- Redéployer : recopier le WAR dans `/tmp/dsfr-faces-deploy/` (autodeploy).
-- Arrêter : `docker rm -f dsfr-faces-gf`.
-- Ne pas monter le WAR directement dans `domains/domain1/autodeploy` : l'image croirait le domaine
-  déjà créé et ne démarrerait pas.
+Après un nouveau build, relancer `docker compose up -d --build --wait showcase` (l'image recopie le WAR).
 
-Le showcase a été vérifié dans Chrome (GlassFish 8.0.5, Mojarra 4.1.17) :
+## Tests d'intégration
 
-- ressources DSFR, polices Marianne et icônes chargées, JS DSFR démarré ;
-- validation ajax au blur et à l'envoi ;
-- envoi complet de la page ;
-- conversion automatique en `Integer` ;
-- arbre d'accessibilité correct ;
-- aucune erreur dans la console.
+Les tests [Playwright](https://playwright.dev/) sont dans `e2e/` et tournent dans Docker, sans rien
+installer sur le poste :
+
+```sh
+mvn clean package
+docker compose up --build --abort-on-container-exit --exit-code-from e2e
+docker compose down
+```
+
+- Le service `showcase` démarre GlassFish avec le WAR. Le service `e2e` attend que la page réponde
+  (healthcheck), puis lance `npm ci` et `npm test` dans l'image `mcr.microsoft.com/playwright`, sous
+  Chromium et Firefox.
+- Le code de sortie est celui des tests. Le rapport HTML est écrit dans `e2e/playwright-report/`, et les
+  traces des tests en échec dans `e2e/test-results/`.
+- Le conteneur de test tourne avec l'utilisateur `1000:1000`, pour que `e2e/node_modules` et les
+  rapports vous appartiennent. Si votre uid est différent :
+  `HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose up …`.
+- Le service ne s'appelle pas `app` : `.app` est un domaine de premier niveau en HSTS préchargé, et les
+  navigateurs forceraient `https://app`.
+
+Tests couverts :
+
+| Fichier | Vérifie |
+|---|---|
+| `tests/showcase.spec.ts` | chargement du DSFR, erreurs des champs obligatoires, validation au blur, envoi ajax et non ajax |
+| `tests/richfaces-migration.spec.ts` | page RichFaces migrée par `sed` : en-tête DSFR injecté, `rich:clientId`, `a4j:ajax` et `rich:message` (`ajaxRendered`), `a4j:commandButton` avec `render` hors du formulaire et `oncomplete` |
+
+Chaque test échoue aussi si la page écrit une erreur dans la console.
+
+### Version de Playwright
+
+L'image Docker (`compose.yml`) et la bibliothèque `@playwright/test` (`e2e/package.json`) doivent avoir
+**exactement la même version** : chaque version de Playwright attend des navigateurs précis. Le script
+`e2e/scripts/check-playwright-version.mjs` le vérifie avant les tests (`pretest`) et échoue avec un
+message explicite en cas d'écart. Il compare aussi la version installée dans `node_modules`.
+
+Pour monter de version :
+
+1. changer le tag de l'image dans `compose.yml` ;
+2. changer la version dans `e2e/package.json` ;
+3. régénérer le verrou avec la nouvelle image :
+
+   ```sh
+   docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD/e2e":/e2e -w /e2e \
+     mcr.microsoft.com/playwright:vX.Y.Z-noble npm install
+   ```
+
+Le contrôle se lance aussi sans Docker (CI) : `node e2e/scripts/check-playwright-version.mjs`.
