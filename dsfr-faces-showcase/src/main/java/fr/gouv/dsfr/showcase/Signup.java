@@ -12,6 +12,7 @@ public class Signup {
 
     private String login;
     private String email;
+    private String profile;
     private boolean registered;
 
     public void register() {
@@ -34,6 +35,14 @@ public class Signup {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
     }
 
     public boolean isRegistered() {

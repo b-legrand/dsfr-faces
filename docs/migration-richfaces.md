@@ -76,9 +76,9 @@ Ce qu'il faut en retenir :
    `element`, `findComponent`, `isUserInRole` et `jQuerySelector`.
 4. **Les balises `h:`, `f:` et `ui:` ne bougent pas.** Les anciens espaces de noms
    (`http://java.sun.com/jsf/*`, `http://xmlns.jcp.org/jsf/*`) sont toujours acceptés par
-   Mojarra 4.1.17 (vérifié sur GlassFish 8.0.5). MyFaces 4.1 reste à vérifier. En revanche, un
-   `h:inputText` ou `h:commandButton` garde son rendu HTML standard, sans classes DSFR : voir le
-   [kit de rendu HTML](#les-composants-h-standard).
+   Mojarra 4.1.17 (vérifié sur GlassFish 8.0.5). MyFaces 4.1 reste à vérifier. Un
+   `h:inputText` ou `h:commandButton` reçoit les classes DSFR grâce au module `dsfr-faces-html` : voir
+   [les composants `h:` standard](#les-composants-h-standard).
 
 ## Prérequis hors `sed`
 
@@ -252,14 +252,39 @@ Légende de priorité :
 
 Le `sed` ne touche pas `h:inputText`, `h:selectOneMenu`, `h:commandButton`, `h:dataTable`… alors qu'ils
 sont majoritaires dans les pages RichFaces. Sans traitement, c'est pire qu'un rendu brut : la remise à zéro
-CSS du DSFR retire la bordure des champs natifs, qui deviennent **invisibles** (constaté sur la page de
-démonstration). Un module optionnel **`dsfr-faces-html`** (feuille de
-route, phase 2) remplacera les renderers du kit `HTML_BASIC` pour leur appliquer les classes DSFR
-(`fr-input`, `fr-select`, `fr-btn`, `fr-label`, `fr-table`…).
+CSS du DSFR retire la bordure des champs natifs, qui deviennent **invisibles**.
 
-Limite : `h:outputLabel` et `h:message` étant des composants séparés du champ, ce mode ne peut pas
-produire le groupe complet (`fr-input-group`, aide, messages reliés en ARIA). Il donne des pages
-présentables, et le passage aux balises `dsfr:` reste recommandé pour la conformité RGAA.
+Le module **`dsfr-faces-html`** (tiré par `dsfr-faces-richfaces-compat`) règle ce problème sans toucher
+aux pages. Il enveloppe le kit de rendu `HTML_BASIC` de l'implémentation par la `RenderKitFactory`
+standard : les renderers de Mojarra ou MyFaces produisent toujours le HTML (ajax, attributs
+pass-through…), et le module ajoute la classe DSFR à leur élément principal.
+
+| Balises | Classe ajoutée |
+|---|---|
+| `h:inputText`, `h:inputSecret`, `h:inputTextarea` | `fr-input` |
+| `h:selectOneMenu`, `h:selectOneListbox`, `h:selectManyMenu`, `h:selectManyListbox` | `fr-select` |
+| `h:outputLabel` | `fr-label` |
+| `h:commandButton`, `h:button` | `fr-btn` |
+| `h:commandLink`, `h:outputLink`, `h:link` | `fr-link` |
+| `h:messages` | rendu en alertes DSFR (comme `dsfr:messages`) |
+| `h:message` | rendu en messages DSFR (comme `dsfr:message`) |
+
+- La classe est **fusionnée** avec `styleClass` (sans doublon), elle ne la remplace pas.
+- Les champs invalides reçoivent `aria-invalid="true"`.
+- Désactiver le module : paramètre de contexte `fr.gouv.dsfr.html.ENABLED=false`.
+
+Limites :
+
+- `h:outputLabel` et `h:message` étant des composants séparés du champ, ce mode ne peut pas produire le
+  groupe complet (`fr-input-group`, aide, messages reliés en ARIA). En particulier, **le DSFR n'affiche
+  l'état d'erreur d'un champ que par son groupe** (`fr-input-group--error`) : un `h:inputText` invalide
+  n'a pas de bordure rouge, l'erreur est signalée par le message voisin et par `aria-invalid`.
+- Cases à cocher et boutons radio (`h:selectBooleanCheckbox`, `h:selectOneRadio`…) restent natifs : le
+  DSFR les dessine à partir d'une structure (`fr-checkbox-group` avec le libellé juste après) que ces
+  balises ne produisent pas.
+- `h:dataTable` n'est pas encore traité (le tableau DSFR demande des conteneurs autour de `<table>`).
+
+Les pages sont présentables ; le passage aux balises `dsfr:` reste recommandé pour la conformité RGAA.
 
 ## Comportements RichFaces implicites à reproduire
 

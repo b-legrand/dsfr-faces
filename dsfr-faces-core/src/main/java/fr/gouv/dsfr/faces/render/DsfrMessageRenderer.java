@@ -18,13 +18,14 @@ import java.util.List;
  *   <p class="fr-message fr-message--error" id="form-loginMsg-0">Message</p>
  * </div>
  * }</pre>
+ * Also used for {@code h:message} by the dsfr-faces-html module (any {@link UIMessage}).
  */
 @FacesRenderer(componentFamily = UIMessage.COMPONENT_FAMILY, rendererType = DsfrMessage.RENDERER_TYPE)
 public class DsfrMessageRenderer extends DsfrRendererBase {
 
     @Override
     public void encodeEnd(FacesContext context, UIComponent component) throws IOException {
-        DsfrMessage message = (DsfrMessage) component;
+        UIMessage message = (UIMessage) component;
         UIComponent target = Components.find(context, message, message.getFor());
         List<FacesMessage> messages = target == null
                 ? List.of()
@@ -32,6 +33,6 @@ public class DsfrMessageRenderer extends DsfrRendererBase {
                         .filter(m -> message.isRedisplay() || !m.isRendered())
                         .toList();
         writeMessagesGroup(context.getResponseWriter(), message, message.getClientId(context),
-                message.getStyleClass(), messages);
+                (String) component.getAttributes().get("styleClass"), messages);
     }
 }

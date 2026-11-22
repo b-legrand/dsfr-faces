@@ -18,6 +18,12 @@ dsfr-faces/
 │       │   └── DsfrInputRendererBase  décodage, conversion, libellé
 │       ├── ajax/                      PartialViewContext : ajaxRendered, limitRender
 │       └── util/Components            recherche d'identifiants à la RichFaces
+├── dsfr-faces-html/         classes DSFR sur les balises h: (enveloppe du kit HTML_BASIC)
+│   └── fr.gouv.dsfr.faces.html
+│       ├── DsfrRenderKitFactory   RenderKitFactory standard qui enveloppe HTML_BASIC
+│       ├── DsfrRenderKit          renderers enveloppés, h:messages / h:message -> renderers dsfr
+│       ├── DsfrClassRenderer      délègue au renderer de l'implémentation
+│       └── DsfrClassWriter        ajoute la classe à l'élément principal
 ├── dsfr-faces-richfaces-compat/   taglibs aux URI RichFaces (rich, a4j), sans jar RichFaces
 │   ├── META-INF/rich.taglib.xml   http://richfaces.org/rich : balises + fonctions EL
 │   ├── META-INF/a4j.taglib.xml    http://richfaces.org/a4j
@@ -54,6 +60,15 @@ Les CSS du DSFR référencent polices et icônes par des `url(...)` relatives. L
 Pas de couche ajax maison : les composants implémentent `ClientBehaviorHolder` et acceptent `<f:ajax>`.
 La compatibilité `a4j:` (voir [migration](migration-richfaces.md)) est construite au-dessus du même
 `AjaxBehavior` que `f:ajax` : le script client est produit par l'implémentation Faces.
+
+### Classes DSFR sur les balises `h:` sans réécrire leurs renderers
+
+`dsfr-faces-html` ne réimplémente pas `h:inputText` & co. : réécrire les renderers standard ferait perdre
+les comportements propres à chaque implémentation (attributs, ajax, pass-through). `DsfrRenderKitFactory`
+enveloppe le kit `HTML_BASIC`, et chaque renderer concerné est enveloppé à son tour. Pendant
+`encodeBegin` / `encodeEnd`, un `ResponseWriterWrapper` repère le premier élément attendu (`input`,
+`select`, `label`…) ouvert avec le composant, fusionne la classe DSFR dans l'attribut `class` écrit par
+le renderer, ou l'ajoute juste avant la fermeture de la balise ouvrante.
 
 ### `ajaxRendered` par un PartialViewContext
 

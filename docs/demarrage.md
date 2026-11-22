@@ -61,8 +61,11 @@ docker run --rm --network host -u "$(id -u):$(id -g)" -v "$PWD":/src -w /src -e 
 
 `dsfr-faces-core` tire `dsfr-faces-resources` (les fichiers DSFR) de façon transitive.
 
+Pour donner le style DSFR aux balises `h:` existantes (`h:inputText`, `h:selectOneMenu`,
+`h:commandButton`…), ajouter `dsfr-faces-html`.
+
 Pour une application RichFaces migrée par `sed`, dépendre plutôt de `dsfr-faces-richfaces-compat` (qui
-tire `dsfr-faces-core`) et retirer les jars RichFaces : voir
+tire `dsfr-faces-core` et `dsfr-faces-html`) et retirer les jars RichFaces : voir
 [migration-richfaces.md](migration-richfaces.md#module-de-compatibilité-dsfr-faces-richfaces-compat).
 
 ### Configuration recommandée (`web.xml`)
@@ -154,7 +157,7 @@ Tests couverts :
 | Fichier | Vérifie |
 |---|---|
 | `tests/showcase.spec.ts` | chargement du DSFR, erreurs des champs obligatoires, validation au blur, envoi ajax et non ajax |
-| `tests/richfaces-migration.spec.ts` | page RichFaces migrée par `sed` : en-tête DSFR injecté, `rich:clientId`, `a4j:ajax` et `rich:message` (`ajaxRendered`), `a4j:commandButton` avec `render` hors du formulaire et `oncomplete` |
+| `tests/richfaces-migration.spec.ts` | page RichFaces migrée par `sed` : en-tête DSFR injecté, classes DSFR sur les `h:` visibles, `rich:clientId`, `a4j:ajax` et `rich:message` (`ajaxRendered`), `a4j:commandButton` avec `render` hors du formulaire et `oncomplete` |
 
 Chaque test échoue aussi si la page écrit une erreur dans la console.
 

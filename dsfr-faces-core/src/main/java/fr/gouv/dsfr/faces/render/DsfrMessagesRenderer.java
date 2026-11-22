@@ -19,6 +19,8 @@ import java.util.Objects;
  * <div class="fr-alert fr-alert--error"><h3 class="fr-alert__title">Summary</h3><p>Detail</p></div>
  * <div class="fr-alert fr-alert--info fr-alert--sm"><p>Text</p></div>
  * }</pre>
+ * Also used for {@code h:messages} by the dsfr-faces-html module (any {@link UIMessages}).
+ * <p>
  * {@code role="alert"} is added on ajax responses only, so that screen readers announce new messages
  * without announcing every message on page load.
  */
@@ -27,13 +29,14 @@ public class DsfrMessagesRenderer extends DsfrRendererBase {
 
     @Override
     public void encodeEnd(FacesContext context, UIComponent component) throws IOException {
-        DsfrMessages messages = (DsfrMessages) component;
+        UIMessages messages = (UIMessages) component;
+        String titleTag = messages instanceof DsfrMessages d ? d.getTitleTag() : "h3";
         ResponseWriter w = context.getResponseWriter();
         boolean ajax = context.getPartialViewContext().isAjaxRequest();
 
         w.startElement("div", messages);
         w.writeAttribute("id", messages.getClientId(context), null);
-        attr(w, "class", messages.getStyleClass());
+        attr(w, "class", component.getAttributes().get("styleClass"));
 
         for (FacesMessage message : messagesToRender(context, messages)) {
             if (!messages.isRedisplay() && message.isRendered()) {
@@ -53,10 +56,10 @@ public class DsfrMessagesRenderer extends DsfrRendererBase {
                 w.writeAttribute("role", "alert", null);
             }
             if (titled) {
-                w.startElement(messages.getTitleTag(), null);
+                w.startElement(titleTag, null);
                 w.writeAttribute("class", "fr-alert__title", null);
                 w.writeText(summary, null);
-                w.endElement(messages.getTitleTag());
+                w.endElement(titleTag);
             }
             w.startElement("p", null);
             w.writeText(titled ? detail : (isBlank(summary) ? detail : summary), null);
@@ -67,7 +70,7 @@ public class DsfrMessagesRenderer extends DsfrRendererBase {
         w.endElement("div");
     }
 
-    private static List<FacesMessage> messagesToRender(FacesContext context, DsfrMessages messages) {
+    private static List<FacesMessage> messagesToRender(FacesContext context, UIMessages messages) {
         if (messages.isGlobalOnly()) {
             return context.getMessageList(null);
         }

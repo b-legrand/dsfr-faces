@@ -27,5 +27,10 @@
             <groupId>fr.gouv.dsfr</groupId>
             <artifactId>dsfr-faces-core</artifactId>
         </dependency>
+        <!-- Migrated pages are mostly h: components: style them too -->
+        <dependency>
+            <groupId>fr.gouv.dsfr</groupId>
+            <artifactId>dsfr-faces-html</artifactId>
+        </dependency>
     </dependencies>
 </project>

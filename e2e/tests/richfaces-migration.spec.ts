@@ -17,6 +17,19 @@ test.describe('page RichFaces migrée par sed', () => {
     await expect(page.locator('#signup-loginClientId')).toHaveText('signup-login');
   });
 
+  test('les composants h: reçoivent les classes DSFR (dsfr-faces-html)', async ({ page }) => {
+    await expect(page.locator('label[for="signup-login"]')).toHaveClass('fr-label');
+    await expect(page.locator('#signup-login')).toHaveClass('fr-input');
+    await expect(page.locator('#signup-profile')).toHaveClass('fr-select');
+    // visible: the DSFR reset removes native borders, fr-input draws a background and a bottom border
+    const style = await page.locator('#signup-login').evaluate((input) => {
+      const css = getComputedStyle(input);
+      return { background: css.backgroundColor, shadow: css.boxShadow };
+    });
+    expect(style.background).not.toBe('rgba(0, 0, 0, 0)');
+    expect(style.shadow).not.toBe('none');
+  });
+
   test('a4j:commandButton est un bouton DSFR', async ({ page }) => {
     await expect(page.locator('#signup-register')).toHaveClass(/\bfr-btn\b/);
   });
@@ -39,6 +52,10 @@ test.describe('page RichFaces migrée par sed', () => {
     await expect(page.locator('#signup-emailMessage .fr-message--error')).toContainText('Adresse électronique');
     await expect(page.locator('#status')).toHaveText('Requête terminée');
     await expect(page.locator('#summary')).toHaveText('');
+    // the form is re-rendered (render="signup, summary"): invalid h: fields are marked
+    await expect(page.locator('#signup-login')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#signup-login')).toHaveClass('fr-input');
+    await expect(page.locator('#signup-profile')).not.toHaveAttribute('aria-invalid');
     expect(await isSameWindow(page)).toBe(true);
   });
 

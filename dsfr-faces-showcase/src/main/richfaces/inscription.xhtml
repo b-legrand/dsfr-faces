@@ -41,9 +41,17 @@
                 <rich:message id="emailMessage" for="email"/>
             </div>
 
+            <div>
+                <h:outputLabel for="profile" value="Profil"/>
+                <h:selectOneMenu id="profile" value="#{signup.profile}">
+                    <f:selectItem itemLabel="Particulier" itemValue="particulier"/>
+                    <f:selectItem itemLabel="Professionnel" itemValue="professionnel"/>
+                </h:selectOneMenu>
+            </div>
+
             <!-- "summary" is outside the form: found in the whole view, as RichFaces did -->
             <a4j:commandButton id="register" value="S'inscrire" action="#{signup.register}"
-                               render="summary"
+                               render="signup, summary"
                                oncomplete="document.getElementById('status').textContent = 'Requête terminée';"/>
         </h:form>
 

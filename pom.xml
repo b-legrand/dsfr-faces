@@ -15,6 +15,7 @@
     <modules>
         <module>dsfr-faces-resources</module>
         <module>dsfr-faces-core</module>
+        <module>dsfr-faces-html</module>
         <module>dsfr-faces-richfaces-compat</module>
         <module>dsfr-faces-showcase</module>
     </modules>
@@ -49,6 +50,11 @@
             <dependency>
                 <groupId>fr.gouv.dsfr</groupId>
                 <artifactId>dsfr-faces-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.gouv.dsfr</groupId>
+                <artifactId>dsfr-faces-html</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

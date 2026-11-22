@@ -69,12 +69,15 @@ Par ordre de valeur pour une application de gestion :
 | Lien d'action | `dsfr:commandLink` / `a4j:commandLink` | ⬜ |
 | Fieldset | regroupement de champs, erreurs de groupe | ⬜ |
 
-## Phase 2 bis : kit de rendu HTML (avancé, prioritaire)
+## Phase 2 bis : kit de rendu HTML
 
-- ⬜ **Module `dsfr-faces-html`** : renderers `HTML_BASIC` remplacés pour appliquer les classes DSFR aux
-  balises `h:` laissées intactes par le `sed` (`inputText`, `selectOneMenu`, `selectBooleanCheckbox`,
-  `outputLabel`, `commandButton` en premier). Constat sur la page de démonstration : sans lui, la remise
-  à zéro CSS du DSFR rend les `h:inputText` **invisibles** (aucune bordure).
+- ✅ **Module `dsfr-faces-html`** : enveloppe du kit `HTML_BASIC` qui ajoute les classes DSFR aux balises
+  `h:` laissées intactes par le `sed` (champs, listes, libellés, boutons, liens) et rend `h:messages` /
+  `h:message` comme leurs équivalents `dsfr:`. Sans lui, la remise à zéro CSS du DSFR rend les
+  `h:inputText` invisibles.
+- ⬜ `h:dataTable` → tableau DSFR (conteneurs `fr-table` autour de `<table>`), avec `rich:dataTable`.
+- ⬜ Cases à cocher et boutons radio `h:` (structure `fr-checkbox-group` / `fr-radio-group` à produire).
+- ⬜ État d'erreur visible des champs `h:` (le DSFR ne le dessine que par le groupe).
 
 ## Phase 3 : composants P2 / P3
 - ⬜ Composants P2 : `autocomplete` (dégradé), `extendedDataTable`, `fileUpload`, `tooltip`,
@@ -114,6 +117,7 @@ Par ordre de valeur pour une application de gestion :
 
 | Sujet | Détail |
 |---|---|
+| Classes ajoutées par `dsfr-faces-html` | repèrent l'élément principal par le nom de balise et le composant passé à `startElement` ; vérifié sous Mojarra, à vérifier sous MyFaces |
 | Pas de tests unitaires | seulement les tests d'intégration Playwright, sous GlassFish / Mojarra uniquement |
 | Marge des alertes | les alertes DSFR n'ont pas de marge externe : prévoir `alertStyleClass` (p. ex. `fr-mb-3w`) sur `dsfr:messages` |
 | Version DSFR en double | dans `dsfr-faces-resources/package.json` et `pom.xml` (`<dsfr.version>`) ; à lire depuis `node_modules/@gouvfr/dsfr/package.json` au build |

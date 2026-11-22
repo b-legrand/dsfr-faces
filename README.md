@@ -17,8 +17,8 @@ Les balises gardent leurs noms et leurs attributs RichFaces (`dsfr:dataTable`, `
 [docs/migration-richfaces.md](docs/migration-richfaces.md).
 
 > **État : v0.1, preuve de concept.** 5 composants (`head`, `inputText`, `button`, `messages`,
-> `message`) et un premier noyau de compatibilité RichFaces (`rich:messages`, `rich:message`,
-> `a4j:ajax`, `a4j:commandButton`, fonctions EL). Le showcase contient une page RichFaces d'origine,
+> `message`), un premier noyau de compatibilité RichFaces (`rich:messages`, `rich:message`,
+> `a4j:ajax`, `a4j:commandButton`, fonctions EL) et le style DSFR des balises `h:` standard. Le showcase contient une page RichFaces d'origine,
 > migrée par ce `sed` au build et vérifiée par des tests Playwright. Le reste est dans la
 > [feuille de route](docs/roadmap.md).
 
@@ -83,7 +83,8 @@ docker compose down
 |---|---|
 | `dsfr-faces-resources` | `dist/` du DSFR sous `META-INF/resources/dsfr`, servi statiquement à `/{contexte}/dsfr/...` |
 | `dsfr-faces-core` | Composants, renderers, `META-INF/dsfr.taglib.xml`. Dépend de `-resources`. |
-| `dsfr-faces-richfaces-compat` | Taglibs aux URI RichFaces (`rich`, `a4j`) pour les pages migrées par `sed`. Remplace les jars RichFaces. |
+| `dsfr-faces-html` | Classes DSFR sur les balises `h:` standard (`h:inputText`, `h:selectOneMenu`, `h:commandButton`…) sans modifier les pages |
+| `dsfr-faces-richfaces-compat` | Taglibs aux URI RichFaces (`rich`, `a4j`) pour les pages migrées par `sed`. Remplace les jars RichFaces. Tire `dsfr-faces-html`. |
 | `dsfr-faces-showcase` | WAR de démonstration, portable, avec une page RichFaces migrée au build |
 | `e2e/` + `compose.yml` | Tests d'intégration Playwright (GlassFish + Chromium et Firefox, dans Docker) |
 
