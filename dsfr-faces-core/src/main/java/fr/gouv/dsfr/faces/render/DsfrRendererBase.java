@@ -36,7 +36,7 @@ public abstract class DsfrRendererBase extends Renderer {
     }
 
     @Override
-    public void encodeChildren(FacesContext context, UIComponent component) {
+    public void encodeChildren(FacesContext context, UIComponent component) throws IOException {
         // children (f:param, ...) are not rendered
     }
 
@@ -63,6 +63,65 @@ public abstract class DsfrRendererBase extends Renderer {
 
     protected static boolean isBlank(String s) {
         return s == null || s.isBlank();
+    }
+
+    /**
+     * String attribute or property of a component (evaluated if it is an expression), or {@code null}.
+     * Lets components declare no property for simple rendering attributes.
+     */
+    protected static String str(UIComponent component, String name) {
+        Object value = component.getAttributes().get(name);
+        return value == null ? null : value.toString();
+    }
+
+    /** Boolean attribute or property ({@code true} or {@code "true"}). */
+    protected static boolean bool(UIComponent component, String name) {
+        Object value = component.getAttributes().get(name);
+        return Boolean.TRUE.equals(value) || "true".equals(value);
+    }
+
+    /** Heading element name from an attribute (h2..h6, or p), or the default. */
+    protected static String headingTag(UIComponent component, String name, String defaultTag) {
+        String tag = str(component, name);
+        return tag != null && tag.matches("h[1-6]|p") ? tag : defaultTag;
+    }
+
+    /** Renders a facet if present and rendered, otherwise the text; returns false if there was neither. */
+    protected static boolean facetOrText(FacesContext context, UIComponent component, String facet, String text)
+            throws IOException {
+        UIComponent f = component.getFacet(facet);
+        if (f != null && f.isRendered()) {
+            f.encodeAll(context);
+            return true;
+        }
+        if (text != null) {
+            context.getResponseWriter().writeText(text, null);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Inline handler sending a standard Faces ajax request with the element as source (its id is sent as
+     * {@code jakarta.faces.source}), e.g. a pagination link. The component must declare
+     * {@code @ResourceDependency(library = "jakarta.faces", name = "faces.js")}.
+     */
+    protected static String ajaxRequest(String execute, String render) {
+        return "faces.ajax.request(this,event,{execute:" + jsString(execute) + ",render:" + jsString(render)
+                + "});return false";
+    }
+
+    /**
+     * True if the element with this id triggered the request: the source of an ajax request, or, for a full
+     * request only, a submitted button / field named after it. On ajax requests only the source counts:
+     * faces.js may send stale fields named after earlier sources.
+     */
+    protected static boolean isSubmitted(FacesContext context, String elementId) {
+        Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+        if (context.getPartialViewContext().isAjaxRequest()) {
+            return elementId.equals(params.get(ClientBehaviorContext.BEHAVIOR_SOURCE_PARAM_NAME));
+        }
+        return params.containsKey(elementId);
     }
 
     // ------------------------------------------------------------------ messages

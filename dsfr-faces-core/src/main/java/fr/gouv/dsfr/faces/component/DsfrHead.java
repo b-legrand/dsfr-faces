@@ -112,6 +112,12 @@ public class DsfrHead extends UIComponentBase {
         script(context, w, "dsfr.module.min.js", true);
         script(context, w, "legacy/legacy.nomodule.min.js", false);
         script(context, w, "dsfr.nomodule.min.js", false);
+
+        // dsfr-faces JavaScript API (DsfrFaces.component(id): modals, tabs, accordions)
+        w.startElement("script", null);
+        w.writeAttribute("defer", "defer", null);
+        w.writeURIAttribute("src", Dsfr.libraryUrl(context, "dsfr-faces.js"), null);
+        w.endElement("script");
     }
 
     private static void link(FacesContext context, ResponseWriter w, String rel, String path, String type) throws IOException {

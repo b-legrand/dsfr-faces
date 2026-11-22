@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:dsfr="http://gouv.fr/dsfr-faces">
+<h:head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>dsfr-faces – composants</title>
+    <dsfr:head/>
+</h:head>
+<h:body>
+    <main class="fr-container fr-my-6w" id="content" role="main">
+        <h1>Composants dsfr-faces</h1>
+
+        <!-- ============================================================ champs -->
+        <h2>Champs de formulaire</h2>
+        <h:form id="fields">
+            <dsfr:messages id="msgs" globalOnly="true" showDetail="true"/>
+
+            <dsfr:inputTextarea id="comment" label="Commentaire" hint="500 caractères maximum" rows="3"
+                                maxlength="500" value="#{preferences.comment}" required="true"/>
+
+            <dsfr:inputSecret id="password" label="Mot de passe" autocomplete="new-password"
+                              value="#{preferences.password}" required="true"/>
+
+            <dsfr:calendar id="birth" label="Date de naissance" max="2026-12-31" value="#{preferences.birthDate}"/>
+
+            <dsfr:selectOneMenu id="department" label="Département" placeholder="Sélectionner un département"
+                                value="#{preferences.department}" required="true">
+                <f:selectItems value="#{communes.departments}"/>
+            </dsfr:selectOneMenu>
+
+            <dsfr:selectOneRadio id="contact" label="Moyen de contact" inline="true"
+                                 value="#{preferences.contact}" required="true">
+                <f:selectItem itemValue="email" itemLabel="Courriel"/>
+                <f:selectItem itemValue="phone" itemLabel="Téléphone" itemDescription="En semaine, de 9 h à 18 h"/>
+            </dsfr:selectOneRadio>
+
+            <dsfr:selectManyCheckbox id="topics" label="Thèmes" value="#{preferences.topics}">
+                <f:selectItems value="#{preferences.topicItems}" var="t" itemValue="#{t}" itemLabel="#{t}"/>
+            </dsfr:selectManyCheckbox>
+
+            <dsfr:selectBooleanCheckbox id="cgu" label="J'accepte les conditions d'utilisation"
+                                        value="#{preferences.cgu}"/>
+
+            <dsfr:toggle id="notifications" label="Notifications par courriel" value="#{preferences.notifications}"/>
+
+            <dsfr:fieldset id="address" legend="Adresse" hint="Facultative">
+                <dsfr:inputText id="street" label="Voie" value="#{preferences.street}"/>
+                <dsfr:inputText id="city" label="Commune" value="#{preferences.city}"/>
+            </dsfr:fieldset>
+
+            <dsfr:button id="save" value="Enregistrer" action="#{preferences.save}">
+                <f:ajax execute="@form" render="@form"/>
+            </dsfr:button>
+        </h:form>
+
+        <!-- ============================================================ tableau, pagination, modale, lien -->
+        <h2 class="fr-mt-6w">Tableau, pagination, modale</h2>
+        <h:form id="list">
+            <dsfr:dataTable id="communes" value="#{communes.all}" var="c" rows="5" caption="Communes" bordered="true">
+                <dsfr:column id="name" sortBy="#{c.name}">
+                    <f:facet name="header">Commune</f:facet>
+                    #{c.name}
+                </dsfr:column>
+                <dsfr:column id="department" sortBy="#{c.department}">
+                    <f:facet name="header">Département</f:facet>
+                    #{c.department}
+                </dsfr:column>
+                <dsfr:column id="population" sortBy="#{c.population}">
+                    <f:facet name="header">Population</f:facet>
+                    #{c.population}
+                </dsfr:column>
+                <dsfr:column id="actions">
+                    <f:facet name="header">Détail</f:facet>
+                    <dsfr:commandLink id="show" value="Voir" action="#{catalogue.select(c)}">
+                        <f:ajax render="@form"/>
+                    </dsfr:commandLink>
+                </dsfr:column>
+            </dsfr:dataTable>
+            <dsfr:dataScroller id="pages" for="communes" maxPages="5"/>
+
+            <dsfr:popupPanel id="detail" header="Détail de la commune" show="#{catalogue.selected != null}">
+                <p id="detailText">#{catalogue.selected.name} (#{catalogue.selected.department}) :
+                    #{catalogue.selected.population} habitants.</p>
+            </dsfr:popupPanel>
+
+            <dsfr:popupPanel id="help" header="Aide" size="sm">
+                <p>Cliquez sur « Trier » dans un en-tête de colonne pour trier le tableau.</p>
+            </dsfr:popupPanel>
+            <button type="button" id="openHelp" class="fr-btn fr-btn--secondary"
+                    onclick="DsfrFaces.component('list-help').show()">Aide (API JavaScript)</button>
+
+            <p class="fr-mt-3w">
+                <dsfr:commandLink id="count" value="Lien d'action sans ajax" action="#{catalogue.count}"
+                                  icon="fr-icon-refresh-line"/>
+                <span id="clicks">#{catalogue.clicks}</span>
+            </p>
+        </h:form>
+
+        <!-- ============================================================ contenus repliables, onglets, panneau -->
+        <h2 class="fr-mt-6w">Accordéons, onglets, panneau</h2>
+        <h:form id="panels">
+            <dsfr:accordion id="faq" activeItem="q2">
+                <dsfr:accordionItem id="q1" header="Qu'est-ce que le DSFR ?">
+                    <p id="a1">Le Système de Design de l'État.</p>
+                </dsfr:accordionItem>
+                <dsfr:accordionItem id="q2" header="Qu'est-ce que dsfr-faces ?">
+                    <p id="a2">Des composants Jakarta Faces au balisage DSFR.</p>
+                </dsfr:accordionItem>
+            </dsfr:accordion>
+
+            <dsfr:collapsiblePanel id="more" header="En savoir plus">
+                <p id="moreText">Contenu replié par défaut.</p>
+            </dsfr:collapsiblePanel>
+
+            <dsfr:tabPanel id="tabs" label="Onglets ajax">
+                <dsfr:tab id="t1" header="Présentation">
+                    <p id="t1Text">Seul l'onglet actif est rendu et traité (switchType ajax).</p>
+                </dsfr:tab>
+                <dsfr:tab id="t2" header="Inscription">
+                    <dsfr:inputText id="nick" label="Pseudonyme" value="#{catalogue.nickname}" required="true"/>
+                </dsfr:tab>
+                <dsfr:tab id="t3" header="Contact" icon="fr-icon-mail-line">
+                    <p id="t3Text">contact@example.fr</p>
+                </dsfr:tab>
+            </dsfr:tabPanel>
+
+            <dsfr:tabPanel id="clientTabs" switchType="client" label="Onglets client">
+                <dsfr:tab id="c1" header="Un"><p id="c1Text">Premier</p></dsfr:tab>
+                <dsfr:tab id="c2" header="Deux"><p id="c2Text">Second</p></dsfr:tab>
+            </dsfr:tabPanel>
+
+            <dsfr:panel id="info" header="Panneau" headerTag="h3">
+                <p>Un panneau RichFaces devient une carte DSFR sans lien.</p>
+            </dsfr:panel>
+
+            <dsfr:button id="post" value="Envoyer" priority="secondary">
+                <f:ajax execute="@form" render="@form"/>
+            </dsfr:button>
+        </h:form>
+    </main>
+</h:body>
+</html>

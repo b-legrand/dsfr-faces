@@ -184,6 +184,24 @@ class FieldMigrationTest {
     }
 
     @Test
+    void wrapsRichCalendarAndSelectWithoutLabel() throws Exception {
+        String source = HEAD + """
+                <h:outputLabel for="since" value="Depuis"/>
+                <dsfr:calendar id="since" value="#{b.since}"/>
+                <h:outputLabel for="dept" value="Département"/>
+                <dsfr:select id="dept" value="#{b.dept}"/>
+                <h:outputLabel for="x" value="X"/>
+                <dsfr:calendar id="x" label="X"/>
+                </html>
+                """;
+        FieldMigration.Result result = FieldMigration.migrate(source);
+        assertEquals(2, result.wrapped());
+        assertTrue(result.content().contains("<dsfr:field id=\"sinceField\">"));
+        assertTrue(result.content().contains("<dsfr:field id=\"deptField\">"));
+        assertTrue(!result.content().contains("<dsfr:field id=\"xField\">"), "a field with label is already a group");
+    }
+
+    @Test
     void reportsMalformedXmlWithLine() {
         XmlLite.ParseException e = assertThrows(XmlLite.ParseException.class,
                 () -> FieldMigration.migrate("<a>\n<b>\n</a>"));

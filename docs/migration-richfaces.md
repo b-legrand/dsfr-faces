@@ -140,6 +140,8 @@ On ne peut pas garder RichFaces pour `a4j:` (ni pour le reste) sous Jakarta Face
 | Élément | Comportement |
 |---|---|
 | `rich:messages` | `dsfr:messages` (alertes DSFR), `ajaxRendered` par défaut |
+| `rich:dataTable`, `rich:column`, `rich:dataScroller`, `rich:panel`, `rich:collapsiblePanel`, `rich:accordion`, `rich:accordionItem`, `rich:tabPanel`, `rich:tab`, `rich:popupPanel`, `rich:calendar`, `rich:select` | composants `dsfr:` équivalents, voir [composants.md](composants.md) |
+| `a4j:commandLink` | `dsfr:commandLink` avec ajax sur `action`, comme `a4j:commandButton` |
 | `rich:message` | `dsfr:message` (`fr-messages-group`), `ajaxRendered` par défaut |
 | `a4j:ajax` | `AjaxBehavior` standard sur le composant parent. Prend en charge `event` (par défaut, l'événement par défaut du parent), `execute` (par défaut `@this`), `render`, `listener` (avec ou sans `AjaxBehaviorEvent`), `disabled`, `immediate`, `resetValues`, `limitRender`, `onbegin`, `onbeforedomupdate`, `oncomplete`, `onerror` et `delay` |
 | `a4j:commandButton` | `dsfr:button` avec ajax sur `action`. `execute` vaut `@form` par défaut ; `render`, `oncomplete`, `limitRender`… comme pour `a4j:ajax`. `onclick` est exécuté avant la requête (`return confirm(…)` l'annule). |
@@ -175,8 +177,9 @@ Détails :
 - La forme englobante de `a4j:ajax` (`<a4j:ajax>` autour de composants) : seule la forme imbriquée dans
   un composant fonctionne.
 - `status`, `bypassUpdates`, `data`, `focus` et `requestGroupingId` sont acceptés mais ignorés.
-- `#{rich:component('x')}` produit `RichFaces.component('…')`, mais l'objet JS `RichFaces` n'existe pas
-  encore : il viendra avec `rich:popupPanel`.
+- `#{rich:component('x')}` renvoie un objet avec `show()` / `hide()` (modale), `switchToItem(nom)`
+  (onglets, accordéons) et `switchPanel()` (panneau repliable) ; les autres méthodes de l'API RichFaces
+  n'existent pas.
 - Toutes les autres balises `rich:` et `a4j:` (voir les tableaux ci-dessous).
 
 ## Migration facultative : groupes DSFR avec `dsfr:field`
@@ -273,15 +276,15 @@ Légende de priorité :
 |---|---|---|---|
 | `rich:messages` | Alerte (`fr-alert`) | P1 | ✅ `dsfr:messages`, `ajaxRendered` par défaut |
 | `rich:message` | Message de champ (`fr-message`) | P1 | ✅ `dsfr:message`, `ajaxRendered` par défaut |
-| `rich:dataTable`, `rich:column` | Tableau (`fr-table`) | P1 | `sortBy`, `sortOrder`, `filterValue`, `rows`, `rowClasses`… |
-| `rich:dataScroller` | Pagination (`fr-pagination`) | P1 | lié à la table par `for` |
-| `rich:panel` | Carte (`fr-card`) ou section avec titre | P1 | rendu à arbitrer : facette `header` → titre |
-| `rich:collapsiblePanel` | Accordéon (`fr-accordion`) | P1 | |
-| `rich:accordion`, `rich:accordionItem` | Groupe d'accordéons | P1 | |
-| `rich:tabPanel`, `rich:tab` | Onglets (`fr-tabs`) | P1 | `switchType` client / ajax / server |
-| `rich:popupPanel` | Modale (`fr-modal`) | P1 | `show()`/`hide()` via l'API JS de compatibilité |
-| `rich:calendar` | Champ date natif (`fr-input`, `type="date"`) | P1 | `datePattern` → convertisseur ; perte du calendrier riche |
-| `rich:select` | Liste déroulante (`fr-select`) | P1 | sans saisie filtrante |
+| `rich:dataTable`, `rich:column` | Tableau (`fr-table`) | P1 | ✅ `sortBy`, `sortOrder`, `rows`, `rowClasses`, `columnClasses`, `noDataLabel`, facette `header` → titre ; pas de filtres |
+| `rich:dataScroller` | Pagination (`fr-pagination`) | P1 | ✅ lié à la table par `for`, ajax |
+| `rich:panel` | Carte sans lien (`fr-card fr-card--no-arrow`) | P1 | ✅ facette ou attribut `header` → titre |
+| `rich:collapsiblePanel` | Accordéon (`fr-accordion`) | P1 | ✅ côté client, état gardé |
+| `rich:accordion`, `rich:accordionItem` | Groupe d'accordéons | P1 | ✅ côté client, `activeItem` gardé |
+| `rich:tabPanel`, `rich:tab` | Onglets (`fr-tabs`) | P1 | ✅ `switchType` ajax (défaut) / server / client |
+| `rich:popupPanel` | Modale (`fr-modal`) | P1 | ✅ `#{rich:component('id')}.show()` / `.hide()`, `show` |
+| `rich:calendar` | Champ date natif (`fr-input`, `type="date"`) | P1 | ✅ conversion vers `Date`, `LocalDate`… ; perte du calendrier riche |
+| `rich:select` | Liste déroulante (`fr-select`) | P1 | ✅ `defaultLabel` → première option ; sans saisie filtrante |
 | `rich:autocomplete` | Champ + `datalist` | P2 | pas d'équivalent DSFR, rendu dégradé |
 | `rich:extendedDataTable` | Tableau (`fr-table`) | P2 | sans colonnes figées ni redimensionnables |
 | `rich:fileUpload` | Ajout de fichier (`fr-upload`) | P2 | |
@@ -314,7 +317,7 @@ Légende de priorité :
 |---|---|---|
 | `a4j:ajax` | ✅ `AjaxBehavior` standard (celui de `f:ajax`) ; `status` ignoré, pas de forme englobante | P1 |
 | `a4j:commandButton` | ✅ bouton DSFR + ajax implicite (`execute="@form"`) | P1 |
-| `a4j:commandLink` | lien DSFR (`fr-link`) + ajax implicite | P1 |
+| `a4j:commandLink` | ✅ lien DSFR (`fr-link`) + ajax implicite (`execute="@form"`) | P1 |
 | `a4j:outputPanel` | `div`/`span` ; `ajaxRendered="true"` (le mécanisme existe déjà dans le cœur) | P1 |
 | `a4j:repeat` | `ui:repeat` | P1 |
 | `a4j:jsFunction` | `h:commandScript` (Faces 2.3+) | P1 |

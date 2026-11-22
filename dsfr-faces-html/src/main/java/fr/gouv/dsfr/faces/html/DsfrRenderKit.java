@@ -1,7 +1,9 @@
 package fr.gouv.dsfr.faces.html;
 
+import fr.gouv.dsfr.faces.render.DsfrDataTableRenderer;
 import fr.gouv.dsfr.faces.render.DsfrMessageRenderer;
 import fr.gouv.dsfr.faces.render.DsfrMessagesRenderer;
+import jakarta.faces.component.UIData;
 import jakarta.faces.component.UIMessage;
 import jakarta.faces.component.UIMessages;
 import jakarta.faces.render.RenderKit;
@@ -16,7 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *     <li>the renderers of {@link DsfrClass#BY_RENDERER} wrapped to add DSFR classes;</li>
  *     <li>{@code h:messages} and {@code h:message} rendered by the dsfr-faces renderers (alerts and
- *     inline messages), as {@code dsfr:messages} / {@code dsfr:message}.</li>
+ *     inline messages), as {@code dsfr:messages} / {@code dsfr:message};</li>
+ *     <li>{@code h:dataTable} rendered as a DSFR table, as {@code dsfr:dataTable} (without sorting).</li>
  * </ul>
  * Every other renderer is returned unchanged.
  */
@@ -24,6 +27,7 @@ final class DsfrRenderKit extends RenderKitWrapper {
 
     private static final String MESSAGES_TYPE = "jakarta.faces.Messages";
     private static final String MESSAGE_TYPE = "jakarta.faces.Message";
+    private static final String TABLE_TYPE = "jakarta.faces.Table";
 
     private final Map<String, Renderer> renderers = new ConcurrentHashMap<>();
 
@@ -38,6 +42,9 @@ final class DsfrRenderKit extends RenderKitWrapper {
         }
         if (UIMessage.COMPONENT_FAMILY.equals(family) && MESSAGE_TYPE.equals(rendererType)) {
             return renderers.computeIfAbsent(key(family, rendererType), k -> new DsfrMessageRenderer());
+        }
+        if (UIData.COMPONENT_FAMILY.equals(family) && TABLE_TYPE.equals(rendererType)) {
+            return renderers.computeIfAbsent(key(family, rendererType), k -> new DsfrDataTableRenderer());
         }
         DsfrClass dsfrClass = DsfrClass.of(family, rendererType);
         Renderer renderer = getWrapped().getRenderer(family, rendererType);

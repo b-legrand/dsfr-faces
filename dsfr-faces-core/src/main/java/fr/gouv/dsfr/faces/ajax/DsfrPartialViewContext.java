@@ -90,7 +90,8 @@ public class DsfrPartialViewContext extends PartialViewContextWrapper {
         Collection<String> executeIds = getExecuteIds();
         Map<String, String> params = context.getExternalContext().getRequestParameterMap();
         String source = params.get(ClientBehaviorContext.BEHAVIOR_SOURCE_PARAM_NAME);
-        boolean typing = TYPING_EVENTS.contains(params.get(ClientBehaviorContext.BEHAVIOR_EVENT_PARAM_NAME));
+        String event = params.get(ClientBehaviorContext.BEHAVIOR_EVENT_PARAM_NAME);
+        boolean typing = event != null && TYPING_EVENTS.contains(event);
 
         VisitContext visit = VisitContext.createVisitContext(context, null,
                 EnumSet.of(VisitHint.SKIP_UNRENDERED, VisitHint.SKIP_ITERATION));

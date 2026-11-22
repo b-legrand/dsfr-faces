@@ -17,6 +17,8 @@ import java.util.Set;
 /**
  * Optional migration (after the mandatory sed): wraps each
  * {@code h:outputLabel for="x"} + field {@code id="x"} [+ {@code h:message} / {@code rich:message for="x"}]
+ * (field: {@code h:input*}, {@code h:select*Menu|Listbox}, or {@code rich:calendar} / {@code rich:select}
+ * without {@code label})
  * sequence of sibling elements in {@code <dsfr:field id="xField">}, so that the page gets the DSFR field
  * group without changing any component id.
  * <ul>
@@ -40,6 +42,9 @@ public final class FieldMigration {
     private static final Set<String> FIELDS = Set.of(
             "inputText", "inputSecret", "inputTextarea",
             "selectOneMenu", "selectOneListbox", "selectManyMenu", "selectManyListbox");
+    /** rich: (or dsfr: after the sed) fields rendered as a bare control without label attribute. */
+    private static final Set<String> RICH_FIELDS = Set.of("calendar", "select", "selectOneMenu", "inputTextarea",
+            "inputSecret");
     private static final String DEFAULT_INDENT = "    ";
 
     /** Migration result of one file. */
@@ -224,7 +229,11 @@ public final class FieldMigration {
     }
 
     private static boolean isField(Element e, String id) {
-        return isHtml(e) && FIELDS.contains(e.localName()) && id.equals(e.attributes.get("id"));
+        String uri = e.namespace();
+        boolean field = (isHtml(e) && FIELDS.contains(e.localName()))
+                || ((RICH_URI.equals(uri) || DSFR_URI.equals(uri)) && RICH_FIELDS.contains(e.localName())
+                && !e.attributes.containsKey("label"));
+        return field && id.equals(e.attributes.get("id"));
     }
 
     private static boolean isMessage(Element e, String forId) {

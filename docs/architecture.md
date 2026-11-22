@@ -9,13 +9,16 @@ dsfr-faces/
 │   ├── package.json         @gouvfr/dsfr, installé par le build Maven (npm ci)
 │   ├── package-lock.json
 │   └── .dsfr.yml            acceptation de licence pour un npm ci manuel
-├── dsfr-faces-core/         composants, renderers, taglib
+├── dsfr-faces-core/         composants, renderers, taglib, API JS (META-INF/resources/dsfr-faces/dsfr-faces.js)
 │   └── fr.gouv.dsfr.faces
 │       ├── Dsfr                       constantes, URL des ressources, version
 │       ├── component/                 UIComponent (état via StateHelper)
 │       ├── render/                    Renderers
-│       │   ├── DsfrRendererBase       comportements client (f:ajax), sévérités, groupe de messages
-│       │   └── DsfrInputRendererBase  décodage, conversion, libellé
+│       │   ├── DsfrRendererBase       comportements client (f:ajax), sévérités, groupe de messages, ajax direct
+│       │   ├── DsfrInputRendererBase  décodage, conversion, libellé
+│       │   ├── DsfrFieldRendererBase  champs à contrôle unique : groupe complet ou contrôle seul
+│       │   └── DsfrChoicesRendererBase  boutons radio et cases dans un fieldset
+│       ├── util/SelectItems           éléments de f:selectItem / f:selectItems
 │       ├── ajax/                      PartialViewContext : ajaxRendered, limitRender
 │       └── util/Components            recherche d'identifiants à la RichFaces
 ├── dsfr-faces-html/         classes DSFR sur les balises h: (enveloppe du kit HTML_BASIC)
@@ -105,6 +108,22 @@ mécanisme pour la requête.
 Les `dsfr:field` sont ajoutés de la même façon quand leur champ figure dans `getExecuteIds()` (ou sous un
 identifiant exécuté, ou `@all`), sauf si l'événement est une frappe (`keyup`, `keydown`, `keypress`,
 `input`) envoyée par ce champ.
+
+### Attributs de rendu lus dans la table d'attributs
+
+Les composants de la phase 2 ne déclarent en Java que ce qui a un comportement : état conservé
+(`activeItem`, `expanded`, `sortOrder`, `switchType`), types et événements ajax. Les attributs de simple
+rendu (`label`, `hint`, `placeholder`, `size`…) sont lus par les renderers avec `getAttributes()`, qui
+évalue aussi les expressions. Attention : une propriété Java dont le getter lirait `getAttributes()` sous
+le même nom bouclerait à l'infini.
+
+### Actions sans comportement client : la source de la requête
+
+Le tri, la pagination et les onglets ajax envoient directement `faces.ajax.request(this, event, …)` :
+l'identifiant de l'élément cliqué (p. ex. `form-table-sort-0`) arrive dans `jakarta.faces.source`, et le
+renderer le reconnaît au décodage (`DsfrRendererBase.isSubmitted`). En ajax, seule la source compte, car
+faces.js peut envoyer des champs nommés d'après des sources précédentes. En envoi complet, un champ ou
+bouton au même nom suffit. Les composants concernés déclarent `@ResourceDependency` sur `faces.js`.
 
 ### Indépendance vis-à-vis du serveur
 

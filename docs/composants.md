@@ -12,6 +12,22 @@ Les exemples de HTML généré supposent `jakarta.faces.SEPARATOR_CHAR` = `-` et
 | [`dsfr:messages`](#dsfrmessages) | Alerte | `rich:messages`, `h:messages` |
 | [`dsfr:message`](#dsfrmessage) | Messages de champ | `rich:message`, `h:message` |
 | [`dsfr:field`](#dsfrfield) | Groupe de champ | structure `h:outputLabel` + champ + message existante |
+| [`dsfr:inputTextarea`](#dsfrinputtextarea) | Zone de texte | `h:inputTextarea` |
+| [`dsfr:inputSecret`](#dsfrinputsecret) | Mot de passe | `h:inputSecret` |
+| [`dsfr:calendar`](#dsfrcalendar) | Champ date natif | `rich:calendar` |
+| [`dsfr:selectOneMenu`](#dsfrselectonemenu) | Liste déroulante | `h:selectOneMenu`, `rich:select` |
+| [`dsfr:selectOneRadio`](#dsfrselectoneradio-et-dsfrselectmanycheckbox) | Boutons radio (+ riches) | `h:selectOneRadio` |
+| [`dsfr:selectManyCheckbox`](#dsfrselectoneradio-et-dsfrselectmanycheckbox) | Cases à cocher | `h:selectManyCheckbox` |
+| [`dsfr:selectBooleanCheckbox`](#dsfrselectbooleancheckbox-et-dsfrtoggle) | Case à cocher | `h:selectBooleanCheckbox` |
+| [`dsfr:toggle`](#dsfrselectbooleancheckbox-et-dsfrtoggle) | Interrupteur | — |
+| [`dsfr:fieldset`](#dsfrfieldset) | Ensemble de champs | — |
+| [`dsfr:commandLink`](#dsfrcommandlink) | Lien d'action | `h:commandLink`, `a4j:commandLink` |
+| [`dsfr:dataTable`, `dsfr:column`](#dsfrdatatable-et-dsfrcolumn) | Tableau (tri) | `rich:dataTable`, `rich:column`, `h:dataTable` |
+| [`dsfr:dataScroller`](#dsfrdatascroller) | Pagination | `rich:dataScroller` |
+| [`dsfr:panel`](#dsfrpanel) | Carte sans lien | `rich:panel` |
+| [`dsfr:accordion`, `dsfr:accordionItem`, `dsfr:collapsiblePanel`](#accordéons) | Accordéons | `rich:accordion`, `rich:accordionItem`, `rich:collapsiblePanel` |
+| [`dsfr:tabPanel`, `dsfr:tab`](#dsfrtabpanel-et-dsfrtab) | Onglets | `rich:tabPanel`, `rich:tab` |
+| [`dsfr:popupPanel`](#dsfrpopuppanel) | Modale | `rich:popupPanel` |
 
 Les balises `rich:` et `a4j:` des pages migrées sont décrites dans
 [migration-richfaces.md](migration-richfaces.md#module-de-compatibilité-dsfr-faces-richfaces-compat).
@@ -218,4 +234,216 @@ Pour une nouvelle page, préférer `dsfr:inputText`.
   </div>
 </div>
 ```
+
+---
+
+## Champs : principe commun
+
+`dsfr:inputTextarea`, `dsfr:inputSecret`, `dsfr:calendar` et `dsfr:selectOneMenu` suivent la même règle :
+
+- **avec `label`** : groupe DSFR complet (`fr-input-group` ou `fr-select-group`). Comme pour
+  `dsfr:inputText`, l'enveloppe porte l'identifiant client et le champ est `{id}-input`. L'enveloppe
+  contient le libellé (avec `*` et `hint`), les messages, `aria-describedby`, `aria-invalid` et
+  `aria-required`.
+- **sans `label`** : le champ seul porte l'identifiant client. Un `h:outputLabel for`, un `h:message` ou un
+  `dsfr:field` existants restent valides. C'est le cas des pages RichFaces migrées (`rich:calendar`,
+  `rich:select`).
+
+Attributs communs : `value`, `required` et les messages, `converter`, `validator`, `immediate`, `label`,
+`hint`, `disabled`, `readonly`, `title`, `styleClass`. Ils acceptent `f:ajax` / `a4j:ajax` (`valueChange`
+par défaut, émis sur `change`).
+
+## `dsfr:inputTextarea`
+
+`<textarea class="fr-input">`. Attributs : `rows`, `placeholder`, `maxlength`.
+
+## `dsfr:inputSecret`
+
+Composant « Mot de passe » du DSFR (`fr-password`), avec la case « Afficher » gérée par le script du DSFR.
+
+- `autocomplete` : `current-password` ou `new-password`.
+- La valeur n'est pas réaffichée, sauf avec `redisplay="true"`.
+
+## `dsfr:calendar`
+
+Champ date natif (`input type="date"`) : le navigateur affiche la date dans sa langue et envoie toujours
+`yyyy-MM-dd`.
+
+| Type de la valeur | Conversion |
+|---|---|
+| `LocalDate` | directe |
+| `LocalDateTime` | début de journée |
+| `java.util.Date` | début de journée dans `timeZone` (par défaut, le fuseau du serveur) |
+| `String` | formatée avec `datePattern`, ISO sinon |
+
+- `min` et `max` sont au format `yyyy-MM-dd`.
+- Un convertisseur explicite est prioritaire, mais il reçoit alors la valeur ISO.
+- Attributs RichFaces sans objet (`popup`, `enableManualInput`, `locale`) : ignorés.
+
+## `dsfr:selectOneMenu`
+
+`<select class="fr-select">`, options issues de `f:selectItem` et `f:selectItems` (objets `SelectItem`,
+tableaux, collections, `Map` libellé → valeur, objets avec `var` / `itemValue` / `itemLabel`), groupes en
+`optgroup`.
+
+- `placeholder` (ou `defaultLabel` de `rich:select`) ajoute une première option vide, désactivée si le
+  champ est obligatoire, comme dans les exemples du DSFR.
+
+## `dsfr:selectOneRadio` et `dsfr:selectManyCheckbox`
+
+Ensemble de champs DSFR (`fr-fieldset`) :
+
+- `label` devient la légende, et chaque élément devient un `fr-radio-group` ou un `fr-checkbox-group` ;
+- la description d'un élément (`itemDescription`) est affichée comme aide ;
+- l'ensemble porte l'identifiant client ; en erreur, il passe en `fr-fieldset--error` avec les messages
+  en dessous.
+
+| Attribut | Description |
+|---|---|
+| `inline` | Éléments sur une ligne (`fr-fieldset__element--inline`). |
+| `rich` (radio) | Boutons radio riches : la description de l'élément est l'URL d'un pictogramme DSFR (svg). |
+
+Valeur de `dsfr:selectManyCheckbox` : tableau, `List`, `Set` ou `SortedSet`. Les éléments sont convertis
+selon le type du tableau ou des valeurs des éléments. Un bouton radio obligatoire sans choix est bien en
+erreur.
+
+## `dsfr:selectBooleanCheckbox` et `dsfr:toggle`
+
+Valeur booléenne.
+
+- `dsfr:selectBooleanCheckbox` : `fr-checkbox-group`, avec `size="sm"` pour la petite case.
+- `dsfr:toggle` : interrupteur (`fr-toggle`).
+  - `checkedLabel` / `uncheckedLabel` : par défaut « Activé » / « Désactivé ».
+  - `labelLeft` : libellé à gauche.
+
+## `dsfr:fieldset`
+
+`fr-fieldset` avec `legend` (ou facette `legend`) et `hint`. Chaque enfant est placé dans un
+`fr-fieldset__element` (`inline` pour les aligner).
+
+L'ensemble passe en erreur :
+- si un champ qu'il contient est invalide ;
+- ou si un message est rattaché à son identifiant (message d'erreur de groupe, ajouté par le bean).
+
+## `dsfr:commandLink`
+
+Lien d'action `a.fr-link` (`icon`, `iconPosition`, `size` `sm`/`lg`, `title`, `disabled`, `onclick`). Le
+contenu est `value`, ou à défaut les enfants.
+
+- **Avec `f:ajax`** (ou en `a4j:commandLink`) : requête ajax.
+- **Sans** : le clic envoie le formulaire, avec les `f:param`.
+- `onclick` est exécuté d'abord ; s'il renvoie `false`, l'action est annulée.
+
+Le DSFR recommande un bouton pour les actions : le lien sert surtout à la compatibilité.
+
+## `dsfr:dataTable` et `dsfr:column`
+
+Tableau DSFR (`fr-table` et ses conteneurs) :
+
+| Attribut | Description |
+|---|---|
+| `value`, `var`, `rows`, `first` | Comme `h:dataTable`. |
+| `caption` (ou facette `caption` / `header`) | Titre du tableau (`caption`). La facette `header` de RichFaces devient le titre. |
+| `size` | `sm`, `md`, `lg`. |
+| `bordered`, `noScroll` | Variantes du DSFR. |
+| `rowClasses`, `columnClasses` | Listes séparées par des virgules, appliquées en boucle. |
+| `noDataLabel` (ou facette `noData`) | Ligne affichée quand il n'y a pas de données. |
+
+Colonnes : facettes `header` et `footer`, `styleClass`, `headerClass`.
+
+**Tri**, comme le tri intégré de RichFaces :
+
+- `sortBy="#{c.nom}"` rend la colonne triable : un bouton « Trier » apparaît dans l'en-tête, avec
+  `aria-sort`.
+- Chaque clic alterne l'ordre croissant et décroissant. Il désactive le tri des autres colonnes et revient à
+  la première page.
+- Le tri est fait en ajax : le tableau et ses `dsfr:dataScroller` sont rafraîchis.
+- Les chaînes sont comparées selon la langue de la vue (« Écully » se range avec les E).
+- `sortOrder` (`ascending`, `descending`, `unsorted`) peut être lié au modèle (chaîne ou enum).
+- Le tri porte sur une copie des lignes, dans un ordre stable d'une requête à l'autre : les actions dans
+  les lignes visent bien la ligne affichée.
+
+Le tableau doit être dans un formulaire. Avec `dsfr-faces-html`, `h:dataTable` est rendu de la même façon,
+sans tri.
+
+## `dsfr:dataScroller`
+
+Pagination DSFR (`fr-pagination`) du tableau désigné par `for`. Le tableau peut se trouver ailleurs dans la
+vue : il est recherché comme dans RichFaces.
+
+- Les liens « Première page », « Page précédente », numéros, « Page suivante » et « Dernière page » envoient
+  une requête ajax qui rafraîchit le tableau et la pagination.
+- `maxPages` : nombre de numéros affichés, 10 par défaut.
+- `boundaryControls` et `stepControls` : `hide` masque les liens de bout et de pas.
+- `page` : expression du numéro de page courant, mise à jour.
+
+## `dsfr:panel`
+
+Carte DSFR sans lien (`fr-card fr-card--no-arrow`) :
+
+- titre `header` ou facette `header`, dans un `h3` (`headerTag` pour un autre niveau) ;
+- contenu dans `fr-card__desc` (`bodyClass`).
+
+## Accordéons
+
+- **`dsfr:accordion`** : groupe d'accordéons (`fr-accordions-group`), un seul ouvert à la fois.
+  - `activeItem` : nom de l'élément ouvert.
+  - L'élément ouvert est gardé d'une requête à l'autre par un champ caché, et écrit dans l'expression de
+    `activeItem` si elle est modifiable.
+- **`dsfr:accordionItem`** :
+  - `header` ou facette `header` ;
+  - `name` : par défaut l'id ;
+  - `headingTag` : par défaut `h3` ;
+  - `disabled`.
+- **`dsfr:collapsiblePanel`** : un accordéon seul ; son état (`expanded`) est gardé de la même façon.
+
+Le changement d'élément se fait côté client, par le script du DSFR. `switchType` est accepté et ignoré.
+
+## `dsfr:tabPanel` et `dsfr:tab`
+
+Onglets DSFR (`fr-tabs`). Chaque `dsfr:tab` (`header` ou facette `header`, `name`, `icon`, `disabled`)
+rend son panneau, qui porte son identifiant client.
+
+| `switchType` | Comportement |
+|---|---|
+| `ajax` (défaut, comme RichFaces) | Seul l'onglet actif est rendu et traité. Un clic recharge les onglets en ajax, sans valider l'onglet quitté. |
+| `server` | Idem, par un envoi complet du formulaire. |
+| `client` | Tous les onglets sont rendus et traités ; le script du DSFR change d'onglet. |
+
+`activeItem` (nom de l'onglet actif) est gardé d'une requête à l'autre et écrit dans son expression.
+`label` est l'`aria-label` de la liste d'onglets (« Onglets » par défaut).
+
+## `dsfr:popupPanel`
+
+Modale DSFR (`dialog.fr-modal`) avec bouton « Fermer » :
+
+| Attribut | Description |
+|---|---|
+| `header` (ou facette `header`) | Titre (`h1`, ou `titleTag`). |
+| `size` | `sm`, `md` (défaut), `lg`. |
+| `show` | Ouvre la modale à l'affichage, y compris après une mise à jour ajax (p. ex. `show="#{bean.selection != null}"`). |
+
+Ouverture et fermeture en JavaScript :
+
+```js
+DsfrFaces.component('form-popup').show();   // et .hide()
+```
+
+Avec la couche de compatibilité, `#{rich:component('popup')}.show()` fonctionne aussi. Une modale ouverte
+et rafraîchie par une requête ajax est rouverte automatiquement.
+
+Les attributs RichFaces sans objet (`modal`, `autosized`, `width`, `height`, `domElementAttachment`) sont
+ignorés.
+
+## API JavaScript
+
+`dsfr:head` charge `dsfr-faces/dsfr-faces.js` :
+
+| Appel | Composant |
+|---|---|
+| `DsfrFaces.component(id).show()` / `.hide()` | `dsfr:popupPanel` |
+| `DsfrFaces.component(id).switchToItem(nom)` | `dsfr:tabPanel`, `dsfr:accordion` |
+| `DsfrFaces.component(id).switchPanel()` | `dsfr:collapsiblePanel` |
+
+La couche de compatibilité ajoute `RichFaces.component(id)`, qui délègue à `DsfrFaces.component(id)`.
 

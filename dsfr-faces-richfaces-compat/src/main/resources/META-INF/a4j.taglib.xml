@@ -59,4 +59,34 @@
         <attribute><description>dsfr-faces: primary (default), secondary, tertiary.</description><name>priority</name><type>java.lang.String</type></attribute>
         <attribute><description>dsfr-faces: DSFR icon class.</description><name>icon</name><type>java.lang.String</type></attribute>
     </tag>
+
+    <!-- ================================================================ commandLink -->
+    <tag>
+        <description>Ajax DSFR action link (dsfr:commandLink + ajax on action). execute defaults to @form.</description>
+        <tag-name>commandLink</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.CommandLink</component-type>
+            <handler-class>fr.gouv.dsfr.faces.richfaces.A4jCommandHandler</handler-class>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>action</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>actionListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><description>DSFR icon class.</description><name>icon</name><type>java.lang.String</type></attribute>
+        <attribute><description>left (default) or right.</description><name>iconPosition</name><type>java.lang.String</type></attribute>
+        <attribute><description>sm or lg.</description><name>size</name><type>java.lang.String</type></attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><description>Run before the action; returning false cancels it.</description><name>onclick</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>execute</name><type>java.lang.Object</type></attribute>
+        <attribute><name>render</name><type>java.lang.Object</type></attribute>
+        <attribute><name>limitRender</name><type>boolean</type></attribute>
+        <attribute><name>onbegin</name><type>java.lang.String</type></attribute>
+        <attribute><name>onbeforedomupdate</name><type>java.lang.String</type></attribute>
+        <attribute><name>oncomplete</name><type>java.lang.String</type></attribute>
+    </tag>
 </facelet-taglib>

@@ -22,8 +22,14 @@ public final class Dsfr {
      */
     public static final String RESOURCE_PATH = "/dsfr";
 
+    /** Path of the dsfr-faces scripts (META-INF/resources/dsfr-faces of dsfr-faces-core), served statically. */
+    public static final String LIBRARY_PATH = "/dsfr-faces";
+
     /** Version of the bundled DSFR, used as a cache-busting query parameter. */
     public static final String DSFR_VERSION;
+
+    /** Version of dsfr-faces, used as a cache-busting query parameter for its own scripts. */
+    public static final String VERSION;
 
     static {
         Properties props = new Properties();
@@ -35,6 +41,7 @@ public final class Dsfr {
             // fall back to "unknown"
         }
         DSFR_VERSION = props.getProperty("dsfr.version", "unknown");
+        VERSION = props.getProperty("dsfr-faces.version", "unknown");
     }
 
     private Dsfr() {
@@ -44,5 +51,11 @@ public final class Dsfr {
     public static String resourceUrl(FacesContext context, String path) {
         ExternalContext ext = context.getExternalContext();
         return ext.encodeResourceURL(ext.getRequestContextPath() + RESOURCE_PATH + "/" + path + "?v=" + DSFR_VERSION);
+    }
+
+    /** URL of a dsfr-faces script, e.g. {@code libraryUrl(ctx, "dsfr-faces.js")}. */
+    public static String libraryUrl(FacesContext context, String path) {
+        ExternalContext ext = context.getExternalContext();
+        return ext.encodeResourceURL(ext.getRequestContextPath() + LIBRARY_PATH + "/" + path + "?v=" + VERSION);
     }
 }

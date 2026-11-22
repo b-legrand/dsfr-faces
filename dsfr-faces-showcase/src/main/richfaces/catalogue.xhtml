@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!--
+    Page RichFaces 4.5 d'origine, NON modifiée à la main (migration obligatoire : sed seul).
+    Composants : rich:dataTable / column / dataScroller, rich:popupPanel + #{rich:component}, rich:panel,
+    rich:collapsiblePanel, rich:accordion, rich:tabPanel (switchType ajax par défaut), rich:calendar,
+    rich:select, a4j:commandLink. Publiée sous /richfaces/catalogue.xhtml.
+-->
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="http://richfaces.org/a4j">
+<h:head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Catalogue – composants RichFaces migrés</title>
+</h:head>
+<h:body>
+    <main class="fr-container fr-my-6w" id="content" role="main">
+        <h1>Catalogue des communes</h1>
+
+        <h:form id="catalogue">
+            <rich:panel id="intro" header="À propos">
+                <p>Page RichFaces migrée par <code>sed</code>, sans autre modification.</p>
+            </rich:panel>
+
+            <rich:dataTable id="communes" value="#{communes.all}" var="c" rows="5" rowClasses="odd, even"
+                            noDataLabel="Aucune commune">
+                <f:facet name="header">Communes</f:facet>
+                <rich:column id="name" sortBy="#{c.name}">
+                    <f:facet name="header">Commune</f:facet>
+                    <h:outputText value="#{c.name}"/>
+                </rich:column>
+                <rich:column id="population" sortBy="#{c.population}">
+                    <f:facet name="header">Population</f:facet>
+                    <h:outputText value="#{c.population}"/>
+                </rich:column>
+                <rich:column id="actions">
+                    <f:facet name="header">Détail</f:facet>
+                    <a4j:commandLink id="show" value="Voir" action="#{catalogue.select(c)}" render="detail"
+                                     oncomplete="#{rich:component('detail')}.show();"/>
+                </rich:column>
+            </rich:dataTable>
+            <rich:dataScroller id="scroller" for="communes" maxPages="5"/>
+
+            <rich:popupPanel id="detail" modal="true" autosized="true">
+                <f:facet name="header">Détail de la commune</f:facet>
+                <h:outputText id="detailText"
+                              value="#{catalogue.selected.name} : #{catalogue.selected.population} habitants."/>
+            </rich:popupPanel>
+
+            <rich:collapsiblePanel id="help" header="Aide" expanded="false">
+                <p id="helpText">Triez le tableau avec les boutons des en-têtes.</p>
+            </rich:collapsiblePanel>
+
+            <rich:accordion id="faq">
+                <rich:accordionItem id="q1" header="Où trouver les données ?">
+                    <p id="a1">Dans le bean Communes.</p>
+                </rich:accordionItem>
+                <rich:accordionItem id="q2" header="Combien de communes ?">
+                    <p id="a2">Vingt-trois.</p>
+                </rich:accordionItem>
+            </rich:accordion>
+
+            <rich:tabPanel id="tabs">
+                <rich:tab id="general" header="Général">
+                    <p id="generalText">Onglet général.</p>
+                </rich:tab>
+                <rich:tab id="search" header="Recherche">
+                    <h:outputLabel for="since" value="Depuis le"/>
+                    <rich:calendar id="since" value="#{catalogue.since}" datePattern="dd/MM/yyyy"/>
+                    <h:outputLabel for="dept" value="Département"/>
+                    <rich:select id="dept" value="#{catalogue.department}" defaultLabel="Choisir un département">
+                        <f:selectItems value="#{communes.departments}"/>
+                    </rich:select>
+                    <a4j:commandButton id="searchButton" value="Rechercher" action="#{catalogue.search}"
+                                       render="searchResult"/>
+                    <h:outputText id="searchResult" value="#{catalogue.searchResult}"/>
+                </rich:tab>
+            </rich:tabPanel>
+        </h:form>
+    </main>
+</h:body>
+</html>

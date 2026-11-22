@@ -20,9 +20,10 @@ Les balises gardent leurs noms et leurs attributs RichFaces (`dsfr:dataTable`, `
 `dsfr:tabPanel`…), mais produisent du HTML DSFR accessible. Voir
 [docs/migration-richfaces.md](docs/migration-richfaces.md).
 
-> **État : v0.1, preuve de concept.** 6 composants (`head`, `inputText`, `button`, `messages`,
-> `message`, `field`), un premier noyau de compatibilité RichFaces (`rich:messages`, `rich:message`,
-> `a4j:ajax`, `a4j:commandButton`, fonctions EL) et le style DSFR des balises `h:` standard. Le showcase contient une page RichFaces d'origine,
+> **État : v0.1.** 26 composants `dsfr:` (champs, listes, cases, interrupteur, mot de passe, date, tableau
+> triable et pagination, modale, onglets, accordéons, panneau, fieldset, liens et boutons), la compatibilité
+> RichFaces pour les balises P1 (`rich:dataTable`, `rich:popupPanel`, `rich:tabPanel`, `a4j:ajax`…, fonctions
+> EL, `RichFaces.component`) et le style DSFR des balises `h:` standard. Le showcase contient une page RichFaces d'origine,
 > migrée par ce `sed` au build et vérifiée par des tests Playwright. Le reste est dans la
 > [feuille de route](docs/roadmap.md).
 

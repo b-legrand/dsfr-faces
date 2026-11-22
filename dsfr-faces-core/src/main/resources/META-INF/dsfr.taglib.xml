@@ -209,4 +209,437 @@
         </attribute>
         <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
     </tag>
+
+    <!-- ================================================================ inputTextarea -->
+    <tag>
+        <description>Multi-line DSFR field (textarea.fr-input).</description>
+        <tag-name>inputTextarea</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.InputTextarea</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute><name>validator</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>valueChangeListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><description>Label. With a label: complete DSFR group (the wrapper carries the client id, the control is {id}-input). Without: bare control carrying the client id, for an existing h:outputLabel for=, h:message or dsfr:field.</description><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><description>Additional description in the label (fr-hint-text).</description><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>readonly</name><type>boolean</type></attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>rows</name><type>int</type></attribute>
+        <attribute><name>placeholder</name><type>java.lang.String</type></attribute>
+        <attribute><name>maxlength</name><type>int</type></attribute>
+    </tag>
+
+    <!-- ================================================================ inputSecret -->
+    <tag>
+        <description>DSFR password field (fr-password, with the « Afficher » checkbox). The value is not redisplayed unless redisplay=true.</description>
+        <tag-name>inputSecret</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.InputSecret</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute><name>validator</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>valueChangeListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><description>Label. With a label: complete DSFR group (the wrapper carries the client id, the control is {id}-input). Without: bare control carrying the client id, for an existing h:outputLabel for=, h:message or dsfr:field.</description><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><description>Additional description in the label (fr-hint-text).</description><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>readonly</name><type>boolean</type></attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><description>current-password or new-password.</description><name>autocomplete</name><type>java.lang.String</type></attribute>
+        <attribute><name>redisplay</name><type>boolean</type></attribute>
+    </tag>
+
+    <!-- ================================================================ calendar -->
+    <tag>
+        <description>Native date field (input type=date). Replaces rich:calendar. yyyy-MM-dd converted to the value type: LocalDate, LocalDateTime, java.util.Date or String (datePattern).</description>
+        <tag-name>calendar</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Calendar</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute><name>validator</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>valueChangeListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><description>Label. With a label: complete DSFR group (the wrapper carries the client id, the control is {id}-input). Without: bare control carrying the client id, for an existing h:outputLabel for=, h:message or dsfr:field.</description><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><description>Additional description in the label (fr-hint-text).</description><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>readonly</name><type>boolean</type></attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><description>yyyy-MM-dd</description><name>min</name><type>java.lang.String</type></attribute>
+        <attribute><description>yyyy-MM-dd</description><name>max</name><type>java.lang.String</type></attribute>
+        <attribute><description>Pattern of a String value (the browser always submits yyyy-MM-dd).</description><name>datePattern</name><type>java.lang.String</type></attribute>
+        <attribute><description>Zone of a java.util.Date value. Default: server zone.</description><name>timeZone</name><type>java.lang.Object</type></attribute>
+    </tag>
+
+    <!-- ================================================================ selectOneMenu -->
+    <tag>
+        <description>DSFR drop-down list (fr-select). Children: f:selectItem, f:selectItems.</description>
+        <tag-name>selectOneMenu</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.SelectOneMenu</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute><name>validator</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>valueChangeListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><description>Label. With a label: complete DSFR group (the wrapper carries the client id, the control is {id}-input). Without: bare control carrying the client id, for an existing h:outputLabel for=, h:message or dsfr:field.</description><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><description>Additional description in the label (fr-hint-text).</description><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>readonly</name><type>boolean</type></attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><description>First empty option (disabled if required).</description><name>placeholder</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ selectOneRadio -->
+    <tag>
+        <description>DSFR radio buttons in a fieldset. Children: f:selectItem, f:selectItems (description = hint).</description>
+        <tag-name>selectOneRadio</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.SelectOneRadio</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute><name>validator</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>valueChangeListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><description>Legend of the fieldset.</description><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><description>Items on one line.</description><name>inline</name><type>boolean</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><description>Rich radios: the item description is the URL of a DSFR pictogram (svg).</description><name>rich</name><type>boolean</type></attribute>
+    </tag>
+
+    <!-- ================================================================ selectManyCheckbox -->
+    <tag>
+        <description>DSFR checkboxes in a fieldset. Value: array, List, Set or SortedSet.</description>
+        <tag-name>selectManyCheckbox</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.SelectManyCheckbox</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute><name>validator</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>valueChangeListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><description>Legend of the fieldset.</description><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><description>Items on one line.</description><name>inline</name><type>boolean</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ selectBooleanCheckbox -->
+    <tag>
+        <description>DSFR checkbox (fr-checkbox-group).</description>
+        <tag-name>selectBooleanCheckbox</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.SelectBooleanCheckbox</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute><name>validator</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>valueChangeListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><description>sm for the small checkbox.</description><name>size</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ toggle -->
+    <tag>
+        <description>DSFR toggle switch (fr-toggle), boolean value.</description>
+        <tag-name>toggle</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Toggle</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>required</name><type>boolean</type></attribute>
+        <attribute><name>requiredMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converterMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>validatorMessage</name><type>java.lang.String</type></attribute>
+        <attribute><name>converter</name><type>jakarta.faces.convert.Converter</type></attribute>
+        <attribute><name>validator</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>valueChangeListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><description>Default « Activé ».</description><name>checkedLabel</name><type>java.lang.String</type></attribute>
+        <attribute><description>Default « Désactivé ».</description><name>uncheckedLabel</name><type>java.lang.String</type></attribute>
+        <attribute><name>labelLeft</name><type>boolean</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ commandLink -->
+    <tag>
+        <description>Action link (a.fr-link). Without ajax behavior the click submits the form (with f:param children). Content: value, or the children.</description>
+        <tag-name>commandLink</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.CommandLink</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>action</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>actionListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><description>DSFR icon class.</description><name>icon</name><type>java.lang.String</type></attribute>
+        <attribute><description>left (default) or right.</description><name>iconPosition</name><type>java.lang.String</type></attribute>
+        <attribute><description>sm or lg.</description><name>size</name><type>java.lang.String</type></attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+        <attribute><description>Run before the action; returning false cancels it.</description><name>onclick</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ panel -->
+    <tag>
+        <description>Content box with a title, rendered as a DSFR card without link (fr-card fr-card--no-arrow). Replaces rich:panel. Facet header.</description>
+        <tag-name>panel</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Panel</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>header</name><type>java.lang.String</type></attribute>
+        <attribute><description>h2..h6, default h3.</description><name>headerTag</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>bodyClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ fieldset -->
+    <tag>
+        <description>DSFR fieldset (fr-fieldset): legend, each child in a fr-fieldset__element, error state when a field inside is invalid, messages attached to the fieldset id. Facet legend.</description>
+        <tag-name>fieldset</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Fieldset</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>legend</name><type>java.lang.String</type></attribute>
+        <attribute><name>hint</name><type>java.lang.String</type></attribute>
+        <attribute><name>inline</name><type>boolean</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ accordion -->
+    <tag>
+        <description>Group of accordion items (fr-accordions-group), one open at a time; the open item is kept across requests. Replaces rich:accordion (client switching).</description>
+        <tag-name>accordion</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Accordion</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><description>Name of the open item (written back to its expression).</description><name>activeItem</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ accordionItem -->
+    <tag>
+        <description>One accordion (fr-accordion). Facet header.</description>
+        <tag-name>accordionItem</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.AccordionItem</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>header</name><type>java.lang.String</type></attribute>
+        <attribute><description>Default: the id.</description><name>name</name><type>java.lang.String</type></attribute>
+        <attribute><description>Default h3.</description><name>headingTag</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+    </tag>
+
+    <!-- ================================================================ collapsiblePanel -->
+    <tag>
+        <description>A single DSFR accordion; the state is kept across requests. Replaces rich:collapsiblePanel (client switching). Facet header.</description>
+        <tag-name>collapsiblePanel</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.CollapsiblePanel</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>header</name><type>java.lang.String</type></attribute>
+        <attribute><description>Written back to its expression.</description><name>expanded</name><type>boolean</type></attribute>
+        <attribute><description>Default h3.</description><name>headingTag</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ tabPanel -->
+    <tag>
+        <description>DSFR tabs (fr-tabs). switchType ajax (default, as RichFaces: only the active tab is rendered and processed), server, or client (every tab rendered and processed).</description>
+        <tag-name>tabPanel</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.TabPanel</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><description>Name of the active tab (written back to its expression).</description><name>activeItem</name><type>java.lang.String</type></attribute>
+        <attribute><description>ajax (default), server, client.</description><name>switchType</name><type>java.lang.String</type></attribute>
+        <attribute><description>aria-label of the tab list. Default « Onglets ».</description><name>label</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ tab -->
+    <tag>
+        <description>One tab of a tabPanel. Facet header.</description>
+        <tag-name>tab</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Tab</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>header</name><type>java.lang.String</type></attribute>
+        <attribute><description>Default: the id.</description><name>name</name><type>java.lang.String</type></attribute>
+        <attribute><description>DSFR icon class.</description><name>icon</name><type>java.lang.String</type></attribute>
+        <attribute><name>disabled</name><type>boolean</type></attribute>
+    </tag>
+
+    <!-- ================================================================ popupPanel -->
+    <tag>
+        <description>DSFR modal (dialog.fr-modal). Replaces rich:popupPanel. Opened with DsfrFaces.component(id).show() / #{rich:component('id')}.show(), or show=true. Facet header.</description>
+        <tag-name>popupPanel</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.PopupPanel</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>header</name><type>java.lang.String</type></attribute>
+        <attribute><description>Default h1.</description><name>titleTag</name><type>java.lang.String</type></attribute>
+        <attribute><description>Open when rendered.</description><name>show</name><type>boolean</type></attribute>
+        <attribute><description>sm, md (default), lg.</description><name>size</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ dataTable -->
+    <tag>
+        <description>DSFR table (fr-table). Replaces rich:dataTable / h:dataTable. Facets caption (or header), noData.</description>
+        <tag-name>dataTable</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.DataTable</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>var</name><type>java.lang.String</type></attribute>
+        <attribute><description>Rows per page (with dataScroller).</description><name>rows</name><type>int</type></attribute>
+        <attribute><name>first</name><type>int</type></attribute>
+        <attribute><name>rowStatePreserved</name><type>boolean</type></attribute>
+        <attribute><name>caption</name><type>java.lang.String</type></attribute>
+        <attribute><description>sm, md, lg.</description><name>size</name><type>java.lang.String</type></attribute>
+        <attribute><name>bordered</name><type>boolean</type></attribute>
+        <attribute><name>noScroll</name><type>boolean</type></attribute>
+        <attribute><description>Comma separated, cycled.</description><name>rowClasses</name><type>java.lang.String</type></attribute>
+        <attribute><name>columnClasses</name><type>java.lang.String</type></attribute>
+        <attribute><name>noDataLabel</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ column -->
+    <tag>
+        <description>Column of a dataTable. Facets header, footer. sortBy: sortable column.</description>
+        <tag-name>column</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.Column</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><description>Value sorted on (expression using the table var).</description><name>sortBy</name><type>java.lang.Object</type></attribute>
+        <attribute><description>ascending, descending or unsorted (String or enum).</description><name>sortOrder</name><type>java.lang.Object</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>headerClass</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ dataScroller -->
+    <tag>
+        <description>DSFR pagination (fr-pagination) of a dataTable with rows, ajax page changes.</description>
+        <tag-name>dataScroller</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.DataScroller</component-type>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><description>Id of the table (RichFaces lookup).</description><name>for</name><type>java.lang.String</type></attribute>
+        <attribute><description>Default 10.</description><name>maxPages</name><type>int</type></attribute>
+        <attribute><description>show (default) or hide.</description><name>boundaryControls</name><type>java.lang.String</type></attribute>
+        <attribute><description>show (default) or hide.</description><name>stepControls</name><type>java.lang.String</type></attribute>
+        <attribute><description>Current page (written back).</description><name>page</name><type>java.lang.Integer</type></attribute>
+    </tag>
 </facelet-taglib>

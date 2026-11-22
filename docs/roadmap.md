@@ -26,11 +26,12 @@ Légende : ✅ fait · 🟡 partiel · ⬜ à faire
 C'est la phase qui conditionne l'objectif. Sans elle, le `sed` produit des pages qui ne se chargent pas.
 
 - 🟡 **Taglib `http://richfaces.org/rich`** dans le module `dsfr-faces-richfaces-compat` (les URI des
-  pages ne sont pas modifiées par le `sed`, c'est elle qui est résolue). Fait : `messages`, `message`.
-  Les autres balises arrivent avec les composants de la phase 2.
-- 🟡 **Taglib `http://richfaces.org/a4j`**. Fait : `a4j:ajax` (forme imbriquée) et
-  `a4j:commandButton`, sur l'`AjaxBehavior` standard. Restent : `commandLink`, `outputPanel`, `repeat`,
-  `jsFunction` et la forme englobante de `a4j:ajax`.
+  pages ne sont pas modifiées par le `sed`, c'est elle qui est résolue). Fait : `messages`, `message`,
+  `dataTable`, `column`, `dataScroller`, `panel`, `collapsiblePanel`, `accordion`, `accordionItem`,
+  `tabPanel`, `tab`, `popupPanel`, `calendar`, `select`. Restent les balises P2 / P3 (phase 3).
+- 🟡 **Taglib `http://richfaces.org/a4j`**. Fait : `a4j:ajax` (forme imbriquée), `a4j:commandButton` et
+  `a4j:commandLink`, sur l'`AjaxBehavior` standard. Restent : `outputPanel`, `repeat`, `jsFunction` et la
+  forme englobante de `a4j:ajax`.
 - ✅ **Fonctions EL** dans la taglib `rich` : `component`, `clientId`, `element`, `findComponent`,
   `isUserInRole`, `jQuerySelector`.
 - ✅ **`ajaxRendered`** et **`limitRender`** : un `PartialViewContext` ajoute à chaque réponse ajax les
@@ -39,8 +40,8 @@ C'est la phase qui conditionne l'objectif. Sans elle, le `sed` produit des pages
   puis conteneurs de nommage englobants, puis toute la vue.
 - ✅ **Injection automatique de l'en-tête DSFR** dans les vues sans `dsfr:head` (paramètre
   `fr.gouv.dsfr.richfaces.AUTO_HEAD`).
-- ⬜ **API JS minimale** `RichFaces.component(id)` / `#{rich:component}` : `show()`, `hide()` et
-  `switchToItem()` branchés sur l'API JS du DSFR.
+- ✅ **API JS minimale** `RichFaces.component(id)` / `#{rich:component}` : `show()`, `hide()`,
+  `switchToItem()` et `switchPanel()`, sur l'API `DsfrFaces.component(id)` et celle du DSFR.
 - ⬜ **Tolérance des attributs** : accepter les attributs RichFaces sans équivalent et avertir en mode
   Development.
 - ✅ **Migration facultative** `dsfr-faces-migrate` (`scripts/migrate-fields.sh`) : enveloppe les motifs
@@ -62,17 +63,28 @@ Par ordre de valeur pour une application de gestion :
 | Composant | Balises couvertes | État |
 |---|---|---|
 | Messages de champ | `rich:message` | ✅ `dsfr:message` |
-| Tableau + colonnes (tri, lignes alternées, `rows`) | `rich:dataTable`, `rich:column` | ⬜ |
-| Pagination | `rich:dataScroller` | ⬜ |
-| Panneau | `rich:panel` (carte ou section, à arbitrer) | ⬜ |
-| Accordéons | `rich:collapsiblePanel`, `rich:accordion`, `rich:accordionItem` | ⬜ |
-| Onglets | `rich:tabPanel`, `rich:tab` (`switchType` client / ajax / server) | ⬜ |
-| Modale | `rich:popupPanel` (+ API JS) | ⬜ |
-| Date | `rich:calendar` → champ date natif, `datePattern` → convertisseur | ⬜ |
-| Liste déroulante | `rich:select`, `dsfr:selectOneMenu` | ⬜ |
-| Champs natifs DSFR | `textarea`, `checkbox` (+ groupe), `radio` (+ riche), `toggle`, `password` | ⬜ |
-| Lien d'action | `dsfr:commandLink` / `a4j:commandLink` | ⬜ |
-| Fieldset | regroupement de champs, erreurs de groupe | ⬜ |
+| Tableau + colonnes (tri, lignes alternées, `rows`) | `rich:dataTable`, `rich:column` | ✅ `dsfr:dataTable`, `dsfr:column` (tri simple, pas de filtres) |
+| Pagination | `rich:dataScroller` | ✅ `dsfr:dataScroller` |
+| Panneau | `rich:panel` | ✅ `dsfr:panel` (carte DSFR sans lien) |
+| Accordéons | `rich:collapsiblePanel`, `rich:accordion`, `rich:accordionItem` | ✅ (changement côté client, état gardé) |
+| Onglets | `rich:tabPanel`, `rich:tab` (`switchType` client / ajax / server) | ✅ `dsfr:tabPanel`, `dsfr:tab` |
+| Modale | `rich:popupPanel` (+ API JS) | ✅ `dsfr:popupPanel` |
+| Date | `rich:calendar` → champ date natif | ✅ `dsfr:calendar` |
+| Liste déroulante | `rich:select`, `dsfr:selectOneMenu` | ✅ |
+| Champs natifs DSFR | `textarea`, `checkbox` (+ groupe), `radio` (+ riche), `toggle`, `password` | ✅ |
+| Lien d'action | `dsfr:commandLink` / `a4j:commandLink` | ✅ |
+| Fieldset | regroupement de champs, erreurs de groupe | ✅ `dsfr:fieldset` |
+
+Limites connues de la phase 2 :
+
+- **Tableaux :** pas de filtres (`filterValue`, `filterExpression`), pas de tri multiple, pas de
+  `rich:columnGroup` / `rich:collapsibleSubTable` ; `rowKeyVar` et `iterationStatusVar` sont ignorés.
+- **Accordéons :** `switchType` ajax / server non pris en charge (tout est rendu, changement côté client).
+- **`rich:tabPanel` :** pas d'`itemChangeListener`. En mode ajax, quitter un onglet ne met pas à jour le
+  modèle avec ce qui y a été saisi (comme un changement `immediate`).
+- **`rich:popupPanel` :** `domElementAttachment` est ignoré ; la modale doit contenir son propre
+  formulaire si elle est placée hors d'un formulaire.
+- **Liens :** `f:param` d'un `dsfr:commandLink` n'est transmis qu'en envoi complet, pas en ajax.
 
 ## Phase 2 bis : kit de rendu HTML
 
@@ -80,7 +92,7 @@ Par ordre de valeur pour une application de gestion :
   `h:` laissées intactes par le `sed` (champs, listes, libellés, boutons, liens) et rend `h:messages` /
   `h:message` comme leurs équivalents `dsfr:`. Sans lui, la remise à zéro CSS du DSFR rend les
   `h:inputText` invisibles.
-- ⬜ `h:dataTable` → tableau DSFR (conteneurs `fr-table` autour de `<table>`), avec `rich:dataTable`.
+- ✅ `h:dataTable` → tableau DSFR (même rendu que `dsfr:dataTable`, sans tri).
 - ⬜ Cases à cocher et boutons radio `h:` (structure `fr-checkbox-group` / `fr-radio-group` à produire).
 - ✅ État d'erreur visible des champs `h:` : par `dsfr:field` (migration facultative). Sans lui, l'erreur
   reste signalée par le message et `aria-invalid`.
@@ -102,7 +114,8 @@ Par ordre de valeur pour une application de gestion :
 
 - ⬜ **Tests unitaires des renderers**, en comparant le HTML produit aux exemples officiels
   (`node_modules/@gouvfr/dsfr/example`), de sorte qu'une montée de version DSFR se lise comme un diff.
-- ⬜ **Tests d'intégration** navigateur (Playwright ou Selenium) : validation ajax, envoi, modales, onglets.
+- ✅ **Tests d'intégration** Playwright (Chromium, Firefox) : validation ajax, envoi, tableaux, pagination,
+  modales, onglets, accordéons, migrations obligatoire et facultative.
 - ⬜ **Matrice de compatibilité** pour tenir la promesse d'indépendance vis-à-vis du serveur :
   - Mojarra et MyFaces ;
   - GlassFish, WildFly, Payara, Open Liberty, TomEE, Tomcat + Mojarra + Weld.
@@ -136,5 +149,6 @@ Par ordre de valeur pour une application de gestion :
 | Ajax : source = enveloppe | vérifié sous Mojarra ; à vérifier sous MyFaces |
 | `ajaxRendered` sous MyFaces | suppose que `PartialViewContext.getRenderIds()` est modifiable (exigé par la spécification, vérifié sous Mojarra) |
 | Coût de `ajaxRendered` | un parcours de l'arbre par réponse ajax ; à mesurer sur de grosses vues |
-| `RichFaces.component()` | produit par `#{rich:component}`, mais l'objet JS `RichFaces` n'existe pas encore |
+| Scripts en ligne | onglets, accordéons, pagination, tri et liens utilisent des gestionnaires `onclick` en ligne : incompatible avec une CSP stricte, comme les comportements `f:ajax` |
+| Attributs lus dans la table d'attributs | les nouveaux composants ne déclarent pas de propriétés Java pour leurs attributs de rendu (`label`, `hint`…) : les renderers les lisent avec `getAttributes()` |
 | GNU sed requis | `scripts/migrate-richfaces.sh` et le build du showcase utilisent `\<` et `sed -i` (GNU) |
