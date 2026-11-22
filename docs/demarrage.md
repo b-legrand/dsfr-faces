@@ -55,9 +55,14 @@ docker run --rm --network host -u "$(id -u):$(id -g)" -v "$PWD":/src -w /src -e 
 <dependency>
   <groupId>fr.gouv.dsfr</groupId>
   <artifactId>dsfr-faces-core</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
 </dependency>
 ```
+
+Les versions sont publiées sur GitHub Packages, qui demande un jeton même pour lire : voir
+[publication.md](publication.md#utiliser-une-version-publiée) pour le dépôt Maven et le `settings.xml`.
+Pour une version en cours de développement (`0.2.0-SNAPSHOT`), installer le dépôt en local
+avec `mvn install`.
 
 `dsfr-faces-core` tire `dsfr-faces-resources` (les fichiers DSFR) de façon transitive.
 
@@ -184,4 +189,7 @@ Pour monter de version :
      mcr.microsoft.com/playwright:vX.Y.Z-noble npm install
    ```
 
-Le contrôle se lance aussi sans Docker (CI) : `node e2e/scripts/check-playwright-version.mjs`.
+Le contrôle se lance aussi sans Docker : `node e2e/scripts/check-playwright-version.mjs`.
+
+Dans GitHub Actions, les mêmes commandes tournent à chaque push et chaque pull request : voir
+[publication.md](publication.md).

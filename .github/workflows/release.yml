@@ -1,0 +1,74 @@
+# Publication d'une version : poussez une étiquette vX.Y.Z (p. ex. git tag v0.1.0 && git push origin v0.1.0).
+#   1. la CI complète (build, tests unitaires, tests Playwright) doit passer ;
+#   2. la version X.Y.Z est appliquée aux pom (la branche main reste en X.Y.Z-SNAPSHOT) ;
+#   3. les jars (+ sources, javadoc) sont publiés sur GitHub Packages ;
+#   4. une release GitHub est créée avec l'outil de migration, le showcase et les scripts.
+# Voir docs/publication.md.
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publication ${{ github.ref_name }}
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # GitHub release
+      packages: write # GitHub Packages (Maven)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version depuis l'étiquette
+        id: version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || [[ "$version" == *SNAPSHOT* ]]; then
+            echo "::error::Étiquette invalide : $GITHUB_REF_NAME (attendu vX.Y.Z ou vX.Y.Z-rc.N)"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$version" == *-* ]]; then echo "prerelease=true" >> "$GITHUB_OUTPUT"; else echo "prerelease=false" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          server-id: github # <repository><id> of distributionManagement in pom.xml
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+
+      - name: Version des pom
+        run: mvn -B -ntp versions:set -DnewVersion="${{ steps.version.outputs.version }}" -DgenerateBackupPoms=false -DprocessAllModules=true
+
+      - name: Publication sur GitHub Packages
+        run: mvn -B -ntp -Prelease deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          mkdir dist
+          cp "dsfr-faces-migrate/target/dsfr-faces-migrate-$VERSION.jar" dist/
+          cp dsfr-faces-showcase/target/dsfr-faces-showcase.war "dist/dsfr-faces-showcase-$VERSION.war"
+          cp scripts/migrate-richfaces.sh scripts/migrate-fields.sh dist/
+          flags=(--title "dsfr-faces $VERSION" --generate-notes --verify-tag)
+          [[ "$PRERELEASE" == true ]] && flags+=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" "${flags[@]}" dist/*

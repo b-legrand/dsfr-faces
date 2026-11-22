@@ -1,5 +1,7 @@
 # dsfr-faces
 
+[![CI](https://github.com/b-legrand/dsfr-faces/actions/workflows/ci.yml/badge.svg)](https://github.com/b-legrand/dsfr-faces/actions/workflows/ci.yml)
+
 Bibliothèque de composants **Jakarta Faces** qui génèrent le balisage du
 [Système de Design de l'État (DSFR)](https://www.systeme-de-design.gouv.fr/).
 
@@ -102,9 +104,13 @@ docker compose down
 | [docs/composants.md](docs/composants.md) | Référence des composants : attributs et HTML généré |
 | [docs/architecture.md](docs/architecture.md) | Choix techniques et conventions des renderers |
 | [docs/migration-richfaces.md](docs/migration-richfaces.md) | Stratégie de migration par `sed`, correspondances RichFaces → DSFR |
+| [docs/publication.md](docs/publication.md) | Intégration continue, publication d'une version, utilisation depuis GitHub Packages |
 | [docs/roadmap.md](docs/roadmap.md) | Ce qui reste à faire |
 
 ## Licence
 
-Le DSFR est réservé aux sites de l'État français : voir `node_modules/@gouvfr/dsfr/LICENSE.md`
-et l'acceptation de licence dans `.dsfr.yml`. La licence du code de dsfr-faces reste à définir.
+Le code de dsfr-faces est sous licence [MIT](LICENSE).
+
+Le DSFR embarqué (`dsfr-faces-resources`) garde sa propre licence. Son usage, notamment celui de la
+marque et de la police Marianne, est réservé aux sites de l'État français : voir
+`node_modules/@gouvfr/dsfr/LICENSE.md` et l'acceptation de licence dans `.dsfr.yml`.

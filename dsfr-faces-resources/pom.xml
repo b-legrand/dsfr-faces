@@ -21,6 +21,8 @@
 
     <properties>
         <dsfr.dist>${project.basedir}/node_modules/@gouvfr/dsfr/dist</dsfr.dist>
+        <!-- No Java code: no javadoc jar in the release profile -->
+        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <build>

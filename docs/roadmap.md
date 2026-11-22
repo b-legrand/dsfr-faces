@@ -6,6 +6,20 @@ But final : migrer une application RichFaces vers le DSFR avec une seule command
 
 Légende : ✅ fait · 🟡 partiel · ⬜ à faire
 
+## Prochaines priorités (après la 0.1.0)
+
+Une page migrée par le `sed` qui contient une balise `rich:` ou `a4j:` non couverte ne se charge pas du
+tout. L'ordre proposé suit donc ce qui casse le plus de pages :
+
+1. **`a4j:` P2** : `outputPanel`, `status`, `region`, `param`, `jsFunction`, `poll`, `repeat`, et la forme
+   englobante de `a4j:ajax`. Ce sont des balises techniques, peu coûteuses, présentes dans presque toutes
+   les applications RichFaces.
+2. **Inventaire avant migration** dans le script de migration. Lancé sur une application réelle, il donne
+   l'ordre de traitement des composants P2 / P3.
+3. **Mise en page DSFR** : `header`, `footer`, `breadcrumb`, `skiplinks`, nécessaires à toute
+   application DSFR.
+4. **MyFaces dans la matrice e2e**, avant d'ajouter d'autres composants.
+
 ## Phase 0 : fondations (v0.1)
 
 - ✅ Build Maven multi-module : `resources`, `core` et `showcase` ; DSFR récupéré par npm dans le cycle de vie Maven (frontend-maven-plugin, `DSFR_ACCEPT_LICENSE=1`).
@@ -30,8 +44,18 @@ C'est la phase qui conditionne l'objectif. Sans elle, le `sed` produit des pages
   `dataTable`, `column`, `dataScroller`, `panel`, `collapsiblePanel`, `accordion`, `accordionItem`,
   `tabPanel`, `tab`, `popupPanel`, `calendar`, `select`. Restent les balises P2 / P3 (phase 3).
 - 🟡 **Taglib `http://richfaces.org/a4j`**. Fait : `a4j:ajax` (forme imbriquée), `a4j:commandButton` et
-  `a4j:commandLink`, sur l'`AjaxBehavior` standard. Restent : `outputPanel`, `repeat`, `jsFunction` et la
-  forme englobante de `a4j:ajax`.
+  `a4j:commandLink`, sur l'`AjaxBehavior` standard. Restent (priorité 1) :
+
+  | Balise | Travail |
+  |---|---|
+  | `outputPanel` | `span` / `div` (`layout="block"`) `ajaxRendered`, déjà pris en charge par le `PartialViewContext` |
+  | `status` | indicateur de requête ajax, sur les événements `faces.ajax` |
+  | `region` | limite le `execute` (`@region`) |
+  | `param` | paramètre recopié dans le modèle (`assignTo`) ; lève aussi la limite des `f:param` en ajax |
+  | `jsFunction` | fonction JS qui lance une requête ajax, avec paramètres |
+  | `poll` | requête ajax périodique |
+  | `repeat` | itération (comme `ui:repeat`) |
+  | `ajax` englobant | forme qui entoure plusieurs champs |
 - ✅ **Fonctions EL** dans la taglib `rich` : `component`, `clientId`, `element`, `findComponent`,
   `isUserInRole`, `jQuerySelector`.
 - ✅ **`ajaxRendered`** et **`limitRender`** : un `PartialViewContext` ajoute à chaque réponse ajax les
@@ -49,9 +73,9 @@ C'est la phase qui conditionne l'objectif. Sans elle, le `sed` produit des pages
   unitaires et page de démonstration distincte (`/richfaces-fields/`) testée par Playwright.
 - ⬜ Migration facultative, niveau suivant : conversion d'un `dsfr:field` en `dsfr:inputText` (change
   l'identifiant client du champ, à relire).
-- 🟡 **Script de migration** : `scripts/migrate-richfaces.sh` applique le `sed`. Restent l'inventaire
-  (balises, fonctions EL, `RichFaces.*`, skins, CSS `rf-*`) et le rapport de ce qui n'est pas pris en
-  charge.
+- 🟡 **Script de migration** : `scripts/migrate-richfaces.sh` applique le `sed`, et la release le joint
+  avec l'outil facultatif. Restent l'inventaire (balises, fonctions EL, `RichFaces.*`, skins, CSS `rf-*`)
+  et le rapport de ce qui n'est pas pris en charge, à lancer avant la migration (priorité 2).
 - 🟡 **Application RichFaces de référence** : une page d'origine (`src/main/richfaces/inscription.xhtml`)
   est migrée par le script à chaque build du showcase et testée par Playwright. À étendre à un échantillon
   réaliste pour mesurer la couverture.
@@ -101,12 +125,26 @@ Limites connues de la phase 2 :
 - ⬜ Composants P2 : `autocomplete` (dégradé), `extendedDataTable`, `fileUpload`, `tooltip`,
   `toolbar`, `dropDownMenu` / menus, `panelMenu` → menu latéral, `inputNumberSpinner`, `inputNumberSlider`,
   `componentControl`, `placeholder`, `focus`.
-- ⬜ `a4j:` P2 : `status`, `region`, `param`, `poll`, `actionListener`.
+- ⬜ `a4j:actionListener` (les autres `a4j:` P2 sont en phase 1, priorité 1).
+- ⬜ Tableaux : filtres (`filterValue`, `filterExpression`), tri multiple, `rich:columnGroup`,
+  `rich:collapsibleSubTable`, `rowKeyVar`.
 - ⬜ Composants P3 en rendu dégradé : `dataGrid`, `list`, `togglePanel`, `notify`, `inplace*`,
   `progressBar`, `tree`, `pickList`, `orderingList`, `push`.
-- ⬜ Mise en page en fichiers de balises : `header`, `footer`, `breadcrumb`, `card`, `tile`, `callout`,
-  `highlight`, `badge`, `tag`, `notice`, `skiplinks`, `stepper`, `summary`.
+
+Composants DSFR sans équivalent RichFaces :
+
+- ⬜ Mise en page de l'application : `header` (en-tête, Marianne, navigation principale), `footer`,
+  `breadcrumb`, `skiplinks` (exigés par le RGAA). Priorité 3.
 - ⬜ Paramètres d'affichage (thème clair / sombre) via le composant « Paramètres d'affichage » du DSFR.
+- ⬜ Contenus, en fichiers de balises : `card`, `tile`, `callout`, `highlight`, `badge`, `tag`, `notice`,
+  `stepper` (formulaires en plusieurs étapes), `summary`.
+- ⬜ Autres composants DSFR, selon les besoins :
+  - barre de recherche, groupe de boutons, contrôle segmenté ;
+  - curseur (pourra servir à `rich:inputNumberSlider`) ;
+  - gestionnaire de consentement ;
+  - lien de téléchargement, citation, transcription ;
+  - bouton FranceConnect.
+- ⬜ Sévérité « succès » (`fr-alert--success`, `fr-message--valid`) : voir « Mode succès » dans la dette.
 - ⬜ Alias RichFaces 3.3 (`rich:modalPanel`, `a4j:support`, `rich:simpleTogglePanel`…), si une
   application cible en a besoin.
 
@@ -122,13 +160,25 @@ Limites connues de la phase 2 :
 - ⬜ Vérifier les anciens espaces de noms (`java.sun.com`, `xmlns.jcp.org`) sous **MyFaces 4.1**
   (vérifié sous Mojarra 4.1.17 uniquement).
 - ⬜ **Audits d'accessibilité automatisés** (axe-core) sur le showcase, et grille RGAA pour les composants.
-- ⬜ Intégration continue : build, tests, audits.
+- ✅ **Intégration continue** (GitHub Actions, `.github/workflows/ci.yml`) : build Maven, tests unitaires,
+  tests Playwright par `docker compose`, rapports joints en cas d'échec. Voir [publication.md](publication.md).
+- ⬜ Audits (axe-core) dans la CI, et matrice de serveurs en jobs parallèles.
+- ⬜ Mises à jour automatiques des dépendances (Dependabot ou Renovate) : actions GitHub, plugins Maven,
+  DSFR, Playwright (image et bibliothèque ensemble).
 
 ## Phase 5 : publication
 
-- ⬜ Choisir la licence du code dsfr-faces (le DSFR lui-même reste réservé aux sites de l'État).
-- ⬜ Publication sur Maven Central (`groupId` définitif, signature).
-- ⬜ Politique de version : suivre les versions mineures du DSFR (`dsfr-faces 1.15.x` ↔ DSFR 1.15).
+- ✅ Licence du code dsfr-faces : **MIT** (`LICENSE`). Le DSFR embarqué garde la sienne, réservée aux
+  sites de l'État.
+- ✅ **Release automatisée** (`.github/workflows/release.yml`, étiquette `vX.Y.Z`) : la CI complète doit
+  passer, puis les jars, avec leurs sources et leur javadoc, sont publiés sur **GitHub Packages**. Une
+  release GitHub joint l'outil de migration, les scripts et le WAR du showcase. Première version :
+  **0.1.0**.
+- ⬜ Publication sur Maven Central, pour que les utilisateurs n'aient plus besoin de jeton. Il faut un
+  `groupId` vérifiable (`fr.gouv.dsfr` ne l'est pas sans le domaine `gouv.fr`, par exemple
+  `io.github.b-legrand`), une signature GPG et les éléments `developers` du pom.
+- 🟡 Politique de version : `0.x` tant que l'API peut changer. Ensuite, suivre les versions mineures du
+  DSFR (`dsfr-faces 1.15.x` ↔ DSFR 1.15).
 - ⬜ Showcase en ligne, une page par composant, avec le code à copier.
 - ⬜ Guide de migration illustré par l'application de référence de la phase 1.
 

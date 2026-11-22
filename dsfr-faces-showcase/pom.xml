@@ -43,6 +43,8 @@
     <properties>
         <richfaces.migrated>${project.build.directory}/richfaces-migrated</richfaces.migrated>
         <richfaces.fields>${project.build.directory}/richfaces-fields-migrated</richfaces.fields>
+        <!-- Demo only: attached to the GitHub release, not published as a Maven package -->
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <build>
