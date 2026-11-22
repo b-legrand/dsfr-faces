@@ -33,7 +33,8 @@ import java.util.logging.Logger;
  * <p>
  * Skipped when the request renders {@code @all}, when the component is already inside a render
  * target, and when the source component carries {@code fr.gouv.dsfr.limitRender.<event>}
- * (RichFaces {@code limitRender="true"}).
+ * (RichFaces {@code limitRender="true"}), or, for a request without behavior event (sent directly with
+ * {@code faces.ajax.request}, e.g. {@code a4j:jsFunction}), a {@code limitRender} attribute.
  */
 public class DsfrPartialViewContext extends PartialViewContextWrapper {
 
@@ -69,12 +70,15 @@ public class DsfrPartialViewContext extends PartialViewContextWrapper {
         String source = params.get(ClientBehaviorContext.BEHAVIOR_SOURCE_PARAM_NAME);
         String event = params.get(ClientBehaviorContext.BEHAVIOR_EVENT_PARAM_NAME);
         UIViewRoot root = context.getViewRoot();
-        if (source == null || event == null || root == null) {
+        if (source == null || root == null) {
             return false;
         }
         boolean[] limit = {false};
-        root.invokeOnComponent(context, source, (ctx, component) ->
-                limit[0] = Boolean.TRUE.equals(component.getAttributes().get(LIMIT_RENDER_ATTRIBUTE_PREFIX + event)));
+        root.invokeOnComponent(context, source, (ctx, component) -> {
+            // behavior request: per event; direct faces.ajax.request (a4j:jsFunction, a4j:poll): the attribute
+            Object value = component.getAttributes().get(event == null ? "limitRender" : LIMIT_RENDER_ATTRIBUTE_PREFIX + event);
+            limit[0] = Boolean.TRUE.equals(value) || "true".equals(value);
+        });
         return limit[0];
     }
 

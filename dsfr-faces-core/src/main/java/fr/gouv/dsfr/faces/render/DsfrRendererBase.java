@@ -2,6 +2,7 @@ package fr.gouv.dsfr.faces.render;
 
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIParameter;
 import jakarta.faces.component.behavior.ClientBehavior;
 import jakarta.faces.component.behavior.ClientBehaviorContext;
 import jakarta.faces.component.behavior.ClientBehaviorHint;
@@ -228,11 +229,17 @@ public abstract class DsfrRendererBase extends Renderer {
         Set<String> submitting = new HashSet<>();
         Map<String, List<ClientBehavior>> behaviors = component instanceof ClientBehaviorHolder holder
                 ? holder.getClientBehaviors() : Map.of();
+        List<ClientBehaviorContext.Parameter> parameters = new ArrayList<>();
+        String clientParams = parameters(component, parameters);
         for (Map.Entry<String, List<ClientBehavior>> entry : behaviors.entrySet()) {
             String logical = entry.getKey();
             String dom = domEvents.getOrDefault(logical, logical);
+            boolean action = "action".equals(logical);
             ClientBehaviorContext bc = ClientBehaviorContext.createClientBehaviorContext(
-                    context, component, logical, sourceId, Collections.emptyList());
+                    context, component, logical, sourceId, action ? parameters : Collections.emptyList());
+            if (action && clientParams != null) {
+                scripts.computeIfAbsent(dom, k -> new ArrayList<>()).add(clientParams);
+            }
             for (ClientBehavior behavior : entry.getValue()) {
                 String script = behavior.getScript(bc);
                 if (!isBlank(script)) {
@@ -255,6 +262,34 @@ public abstract class DsfrRendererBase extends Renderer {
             }
             w.writeAttribute("on" + entry.getKey(), js, null);
         }
+    }
+
+    /**
+     * Request parameters of a command's ajax action: its {@code UIParameter} children ({@code f:param},
+     * {@code a4j:param}), sent with the request by the Faces implementation.
+     * <p>
+     * A parameter with the attribute {@code noEscape="true"} (RichFaces {@code a4j:param}) has a JavaScript
+     * expression as value, evaluated in the browser on each click: it cannot be a behavior parameter (they are
+     * string literals), so it is returned as a script adding it to the form just before the request.
+     *
+     * @param parameters receives the plain parameters
+     * @return the script for the noEscape parameters, or {@code null}
+     */
+    private static String parameters(UIComponent component, List<ClientBehaviorContext.Parameter> parameters) {
+        StringBuilder js = null;
+        for (UIComponent child : component.getChildren()) {
+            if (!(child instanceof UIParameter param) || param.isDisable() || isBlank(param.getName())) {
+                continue;
+            }
+            Object value = param.getValue();
+            if (bool(param, "noEscape")) {
+                js = js == null ? new StringBuilder("DsfrFaces.params(this,{") : js.append(',');
+                js.append(jsString(param.getName())).append(":(").append(value == null ? "''" : value).append(')');
+            } else {
+                parameters.add(new ClientBehaviorContext.Parameter(param.getName(), value == null ? "" : value));
+            }
+        }
+        return js == null ? null : js.append("})").toString();
     }
 
     /** Single-quoted JavaScript string literal. */

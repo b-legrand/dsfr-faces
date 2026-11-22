@@ -11,14 +11,15 @@ Légende : ✅ fait · 🟡 partiel · ⬜ à faire
 Une page migrée par le `sed` qui contient une balise `rich:` ou `a4j:` non couverte ne se charge pas du
 tout. L'ordre proposé suit donc ce qui casse le plus de pages :
 
-1. **`a4j:` P2** : `outputPanel`, `status`, `region`, `param`, `jsFunction`, `poll`, `repeat`, et la forme
-   englobante de `a4j:ajax`. Ce sont des balises techniques, peu coûteuses, présentes dans presque toutes
-   les applications RichFaces.
+1. ✅ **`a4j:` P2** : `outputPanel`, `status`, `region`, `param`, `jsFunction`, `poll`, `repeat`,
+   `actionListener` et la forme englobante de `a4j:ajax`.
 2. **Inventaire avant migration** dans le script de migration. Lancé sur une application réelle, il donne
    l'ordre de traitement des composants P2 / P3.
 3. **Mise en page DSFR** : `header`, `footer`, `breadcrumb`, `skiplinks`, nécessaires à toute
    application DSFR.
-4. **MyFaces dans la matrice e2e**, avant d'ajouter d'autres composants.
+4. **MyFaces dans la matrice e2e**, avant d'ajouter d'autres composants. Les balises `a4j:` reposent sur
+   des points à vérifier sous MyFaces : `params` de `faces.ajax.request`, ordre des écouteurs
+   `faces.ajax.addOnEvent`, et soumission partielle.
 
 ## Phase 0 : fondations (v0.1)
 
@@ -43,19 +44,13 @@ C'est la phase qui conditionne l'objectif. Sans elle, le `sed` produit des pages
   pages ne sont pas modifiées par le `sed`, c'est elle qui est résolue). Fait : `messages`, `message`,
   `dataTable`, `column`, `dataScroller`, `panel`, `collapsiblePanel`, `accordion`, `accordionItem`,
   `tabPanel`, `tab`, `popupPanel`, `calendar`, `select`. Restent les balises P2 / P3 (phase 3).
-- 🟡 **Taglib `http://richfaces.org/a4j`**. Fait : `a4j:ajax` (forme imbriquée), `a4j:commandButton` et
-  `a4j:commandLink`, sur l'`AjaxBehavior` standard. Restent (priorité 1) :
+- ✅ **Taglib `http://richfaces.org/a4j`**, sur l'`AjaxBehavior` standard et `faces.ajax.request` :
+  - `ajax` (formes imbriquée et englobante), `commandButton`, `commandLink` ;
+  - `outputPanel`, `status` (nommé ou non), `region` (`@region`), `param` (`assignTo`, `noEscape`) ;
+  - `jsFunction`, `poll`, `repeat`, `actionListener`.
 
-  | Balise | Travail |
-  |---|---|
-  | `outputPanel` | `span` / `div` (`layout="block"`) `ajaxRendered`, déjà pris en charge par le `PartialViewContext` |
-  | `status` | indicateur de requête ajax, sur les événements `faces.ajax` |
-  | `region` | limite le `execute` (`@region`) |
-  | `param` | paramètre recopié dans le modèle (`assignTo`) ; lève aussi la limite des `f:param` en ajax |
-  | `jsFunction` | fonction JS qui lance une requête ajax, avec paramètres |
-  | `poll` | requête ajax périodique |
-  | `repeat` | itération (comme `ui:repeat`) |
-  | `ajax` englobant | forme qui entoure plusieurs champs |
+  Page de démonstration `richfaces/a4j.xhtml`, testée par `richfaces-a4j.spec.ts`. Restent `a4j:push`,
+  `a4j:queue` / `attachQueue` / `log` et `a4j:mediaOutput` (phase 3).
 - ✅ **Fonctions EL** dans la taglib `rich` : `component`, `clientId`, `element`, `findComponent`,
   `isUserInRole`, `jQuerySelector`.
 - ✅ **`ajaxRendered`** et **`limitRender`** : un `PartialViewContext` ajoute à chaque réponse ajax les
@@ -108,7 +103,8 @@ Limites connues de la phase 2 :
   modèle avec ce qui y a été saisi (comme un changement `immediate`).
 - **`rich:popupPanel` :** `domElementAttachment` est ignoré ; la modale doit contenir son propre
   formulaire si elle est placée hors d'un formulaire.
-- **Liens :** `f:param` d'un `dsfr:commandLink` n'est transmis qu'en envoi complet, pas en ajax.
+- ~~**Liens :** `f:param` d'un `dsfr:commandLink` n'est transmis qu'en envoi complet.~~ Levée : les
+  `f:param` (et `a4j:param`) des commandes sont aussi envoyés en ajax.
 
 ## Phase 2 bis : kit de rendu HTML
 
@@ -125,7 +121,10 @@ Limites connues de la phase 2 :
 - ⬜ Composants P2 : `autocomplete` (dégradé), `extendedDataTable`, `fileUpload`, `tooltip`,
   `toolbar`, `dropDownMenu` / menus, `panelMenu` → menu latéral, `inputNumberSpinner`, `inputNumberSlider`,
   `componentControl`, `placeholder`, `focus`.
-- ⬜ `a4j:actionListener` (les autres `a4j:` P2 sont en phase 1, priorité 1).
+- ⬜ `a4j:` P3 : `push` (→ `f:websocket`), `queue` / `attachQueue` / `log` (à ignorer avec un avertissement),
+  `mediaOutput`.
+- ⬜ `a4j:status` limité au formulaire ou à la région qui le contient (aujourd'hui : global ou nommé) ;
+  `rich:dataScroller` sur un `a4j:repeat`.
 - ⬜ Tableaux : filtres (`filterValue`, `filterExpression`), tri multiple, `rich:columnGroup`,
   `rich:collapsibleSubTable`, `rowKeyVar`.
 - ⬜ Composants P3 en rendu dégradé : `dataGrid`, `list`, `togglePanel`, `notify`, `inplace*`,

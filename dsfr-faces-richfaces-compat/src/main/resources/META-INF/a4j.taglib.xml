@@ -14,7 +14,7 @@
 
     <!-- ================================================================ ajax -->
     <tag>
-        <description>Ajax behavior for the parent component (f:ajax with RichFaces attributes). execute defaults to @this.</description>
+        <description>Ajax behavior (f:ajax with RichFaces attributes): nested, for the parent component; wrapping, for every component of its body supporting the event. execute defaults to @this (the enclosing a4j:region if any).</description>
         <tag-name>ajax</tag-name>
         <handler-class>fr.gouv.dsfr.faces.richfaces.A4jAjaxHandler</handler-class>
         <attribute><description>Event (default: the parent's default event).</description><name>event</name><type>java.lang.String</type></attribute>
@@ -30,6 +30,7 @@
         <attribute><name>oncomplete</name><type>java.lang.String</type></attribute>
         <attribute><name>onerror</name><type>java.lang.String</type></attribute>
         <attribute><name>delay</name><type>java.lang.String</type></attribute>
+        <attribute><description>Name of the a4j:status to show during the request.</description><name>status</name><type>java.lang.String</type></attribute>
     </tag>
 
     <!-- ================================================================ commandButton -->
@@ -54,6 +55,7 @@
         <attribute><name>onbegin</name><type>java.lang.String</type></attribute>
         <attribute><name>onbeforedomupdate</name><type>java.lang.String</type></attribute>
         <attribute><name>oncomplete</name><type>java.lang.String</type></attribute>
+        <attribute><description>Name of the a4j:status to show during the request.</description><name>status</name><type>java.lang.String</type></attribute>
         <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
         <attribute><name>title</name><type>java.lang.String</type></attribute>
         <attribute><description>dsfr-faces: primary (default), secondary, tertiary.</description><name>priority</name><type>java.lang.String</type></attribute>
@@ -88,5 +90,154 @@
         <attribute><name>onbegin</name><type>java.lang.String</type></attribute>
         <attribute><name>onbeforedomupdate</name><type>java.lang.String</type></attribute>
         <attribute><name>oncomplete</name><type>java.lang.String</type></attribute>
+        <attribute><description>Name of the a4j:status to show during the request.</description><name>status</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ outputPanel -->
+    <tag>
+        <description>span (div with layout="block") always rendered with its id: ajax render target; ajaxRendered="true" re-renders it with every ajax request.</description>
+        <tag-name>outputPanel</tag-name>
+        <component><component-type>fr.gouv.dsfr.richfaces.OutputPanel</component-type></component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><description>Re-rendered by every ajax request (default false).</description><name>ajaxRendered</name><type>boolean</type></attribute>
+        <attribute><description>inline (span, default) or block (div).</description><name>layout</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>style</name><type>java.lang.String</type></attribute>
+        <attribute><name>title</name><type>java.lang.String</type></attribute>
+        <attribute><name>dir</name><type>java.lang.String</type></attribute>
+        <attribute><name>lang</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ status -->
+    <tag>
+        <description>Ajax request indicator: start content during the request, stop content otherwise, error content after a failure. Without name: requests that name no status; with name: requests with status="name".</description>
+        <tag-name>status</tag-name>
+        <component><component-type>fr.gouv.dsfr.richfaces.Status</component-type></component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>name</name><type>java.lang.String</type></attribute>
+        <attribute><name>startText</name><type>java.lang.String</type></attribute>
+        <attribute><name>stopText</name><type>java.lang.String</type></attribute>
+        <attribute><name>errorText</name><type>java.lang.String</type></attribute>
+        <attribute><name>startStyle</name><type>java.lang.String</type></attribute>
+        <attribute><name>stopStyle</name><type>java.lang.String</type></attribute>
+        <attribute><name>errorStyle</name><type>java.lang.String</type></attribute>
+        <attribute><name>startStyleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>stopStyleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>errorStyleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>onstart</name><type>java.lang.String</type></attribute>
+        <attribute><name>onstop</name><type>java.lang.String</type></attribute>
+        <attribute><name>onsuccess</name><type>java.lang.String</type></attribute>
+        <attribute><name>onerror</name><type>java.lang.String</type></attribute>
+        <attribute><description>inline (span, default) or block (div).</description><name>layout</name><type>java.lang.String</type></attribute>
+        <attribute><name>styleClass</name><type>java.lang.String</type></attribute>
+        <attribute><name>style</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ region -->
+    <tag>
+        <description>Part of the tree processed by default by the a4j controls inside it (execute="@region"). Renders no element.</description>
+        <tag-name>region</tag-name>
+        <component><component-type>fr.gouv.dsfr.richfaces.Region</component-type></component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+    </tag>
+
+    <!-- ================================================================ param -->
+    <tag>
+        <description>Request parameter of a command (or argument of a4j:jsFunction), written to assignTo before the action.</description>
+        <tag-name>param</tag-name>
+        <component>
+            <component-type>fr.gouv.dsfr.richfaces.Param</component-type>
+            <handler-class>fr.gouv.dsfr.faces.richfaces.A4jParamHandler</handler-class>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>name</name><required>true</required><type>java.lang.String</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><description>Value expression receiving the submitted value, converted.</description><name>assignTo</name><type>java.lang.Object</type></attribute>
+        <attribute><description>Converter or converter id (default: by the type of assignTo).</description><name>converter</name><type>java.lang.Object</type></attribute>
+        <attribute><description>value is a JavaScript expression evaluated in the browser.</description><name>noEscape</name><type>boolean</type></attribute>
+        <attribute><name>disable</name><type>boolean</type></attribute>
+    </tag>
+
+    <!-- ================================================================ jsFunction -->
+    <tag>
+        <description>Global JavaScript function sending an ajax request (action, execute, render); its arguments are the nested a4j:param, in order. Must be inside a form. execute defaults to @form (the enclosing a4j:region if any).</description>
+        <tag-name>jsFunction</tag-name>
+        <component><component-type>fr.gouv.dsfr.richfaces.JsFunction</component-type></component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><description>Name of the JavaScript function.</description><name>name</name><required>true</required><type>java.lang.String</type></attribute>
+        <attribute><name>action</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>actionListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><name>execute</name><type>java.lang.Object</type></attribute>
+        <attribute><name>render</name><type>java.lang.Object</type></attribute>
+        <attribute><name>limitRender</name><type>boolean</type></attribute>
+        <attribute><name>resetValues</name><type>boolean</type></attribute>
+        <attribute><name>delay</name><type>java.lang.String</type></attribute>
+        <attribute><name>status</name><type>java.lang.String</type></attribute>
+        <attribute><name>onbegin</name><type>java.lang.String</type></attribute>
+        <attribute><name>onbeforedomupdate</name><type>java.lang.String</type></attribute>
+        <attribute><name>oncomplete</name><type>java.lang.String</type></attribute>
+        <attribute><name>onerror</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ poll -->
+    <tag>
+        <description>Periodic ajax request: every interval ms (default 1000) while enabled (default true), the next one once the previous has completed. Must be inside a form. execute defaults to @this (the enclosing a4j:region if any).</description>
+        <tag-name>poll</tag-name>
+        <component><component-type>fr.gouv.dsfr.richfaces.Poll</component-type></component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.component.UIComponent</type></attribute>
+        <attribute><name>interval</name><type>int</type></attribute>
+        <attribute><name>enabled</name><type>boolean</type></attribute>
+        <attribute><name>action</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>actionListener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>immediate</name><type>boolean</type></attribute>
+        <attribute><name>execute</name><type>java.lang.Object</type></attribute>
+        <attribute><name>render</name><type>java.lang.Object</type></attribute>
+        <attribute><name>limitRender</name><type>boolean</type></attribute>
+        <attribute><name>status</name><type>java.lang.String</type></attribute>
+        <attribute><description>Run before each request; returning false skips it.</description><name>ontimer</name><type>java.lang.String</type></attribute>
+        <attribute><name>onbegin</name><type>java.lang.String</type></attribute>
+        <attribute><name>onbeforedomupdate</name><type>java.lang.String</type></attribute>
+        <attribute><name>oncomplete</name><type>java.lang.String</type></attribute>
+        <attribute><name>onerror</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ repeat -->
+    <tag>
+        <description>Iteration without markup: ui:repeat of the Faces implementation, with the RichFaces attribute names (rows, first, iterationStatusVar).</description>
+        <tag-name>repeat</tag-name>
+        <component>
+            <component-type>facelets.ui.Repeat</component-type>
+            <handler-class>fr.gouv.dsfr.faces.richfaces.A4jRepeatHandler</handler-class>
+        </component>
+        <attribute><name>id</name><type>java.lang.String</type></attribute>
+        <attribute><name>rendered</name><type>boolean</type></attribute>
+        <attribute><name>value</name><type>java.lang.Object</type></attribute>
+        <attribute><name>var</name><type>java.lang.String</type></attribute>
+        <attribute><description>Number of items to show (ui:repeat size).</description><name>rows</name><type>int</type></attribute>
+        <attribute><description>Index of the first item (ui:repeat offset).</description><name>first</name><type>int</type></attribute>
+        <attribute><description>Iteration status variable: index, first, last, even, odd (ui:repeat varStatus).</description><name>iterationStatusVar</name><type>java.lang.String</type></attribute>
+        <attribute><description>Ignored.</description><name>rowKeyVar</name><type>java.lang.String</type></attribute>
+    </tag>
+
+    <!-- ================================================================ actionListener -->
+    <tag>
+        <description>Action listener of the parent command: listener (method with an ActionEvent or no argument), type or binding.</description>
+        <tag-name>actionListener</tag-name>
+        <handler-class>fr.gouv.dsfr.faces.richfaces.A4jActionListenerHandler</handler-class>
+        <attribute><name>listener</name><type>jakarta.el.MethodExpression</type></attribute>
+        <attribute><name>type</name><type>java.lang.String</type></attribute>
+        <attribute><name>binding</name><type>jakarta.faces.event.ActionListener</type></attribute>
     </tag>
 </facelet-taglib>

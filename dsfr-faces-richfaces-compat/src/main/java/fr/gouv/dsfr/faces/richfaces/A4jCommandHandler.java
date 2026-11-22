@@ -8,7 +8,7 @@ import jakarta.faces.view.facelets.MetaRuleset;
 
 /**
  * {@code a4j:commandButton} (and later {@code a4j:commandLink}): a dsfr-faces command component with an
- * ajax behavior on {@code action}. {@code execute} defaults to {@code @form}; {@code render},
+ * ajax behavior on {@code action}. {@code execute} defaults to {@code @form} (the enclosing {@code a4j:region} if any); {@code render},
  * {@code oncomplete}, {@code limitRender}… are taken from the tag. {@code action}, {@code actionListener},
  * {@code immediate}, {@code disabled} and {@code onclick} stay on the component.
  */
@@ -29,6 +29,6 @@ public class A4jCommandHandler extends ComponentHandler {
 
     @Override
     public void onComponentCreated(FaceletContext ctx, UIComponent c, UIComponent parent) {
-        AjaxSupport.attach(ctx, tag, this::getAttribute, c, "action", "@form", false);
+        AjaxSupport.attach(ctx, tag, this::getAttribute, c, "action", AjaxIds.REGION_OR_FORM, false);
     }
 }

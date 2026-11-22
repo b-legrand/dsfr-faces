@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!--
+    Page RichFaces 4.5 d'origine, NON modifiée à la main (migration obligatoire : sed seul).
+    Balises a4j: de la phase 3 : outputPanel, status, region, param, jsFunction, poll, repeat,
+    a4j:ajax englobant, actionListener. Publiée sous /richfaces/a4j.xhtml.
+-->
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="http://richfaces.org/a4j">
+<h:head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>a4j – balises Ajax RichFaces migrées</title>
+</h:head>
+<h:body>
+    <main class="fr-container fr-my-6w" id="content" role="main">
+        <h1>Balises a4j</h1>
+
+        <p>
+            <a4j:status id="globalStatus" startText="Chargement…" stopText="Prêt"/>
+            <a4j:status id="slowStatus" name="slow" startText="Traitement long…"/>
+        </p>
+
+        <h:form id="ajax">
+            <!-- ======================================================== outputPanel -->
+            <h2>Panneaux</h2>
+            <a4j:outputPanel id="last" ajaxRendered="true">Dernière action : #{a4jDemo.lastAction}</a4j:outputPanel>
+
+            <a4j:outputPanel id="details" layout="block">
+                <h:panelGroup id="detailsText" rendered="#{a4jDemo.details}">Détails affichés.</h:panelGroup>
+            </a4j:outputPanel>
+            <a4j:commandButton id="toggle" value="Afficher / masquer" action="#{a4jDemo.toggleDetails}"
+                               render="details"/>
+
+            <!-- ======================================================== status -->
+            <h2>Indicateurs</h2>
+            <a4j:commandButton id="wait" value="Attendre" action="#{a4jDemo.waitShort}"/>
+            <a4j:commandButton id="slow" value="Traitement long" action="#{a4jDemo.slow}" status="slow"/>
+
+            <!-- ======================================================== param, actionListener -->
+            <h2>Paramètres</h2>
+            <a4j:commandButton id="pick" value="Choisir Albi" action="#{a4jDemo.pick}" render="picked">
+                <a4j:param name="commune" value="Albi" assignTo="#{a4jDemo.picked}"/>
+                <a4j:param name="population" value="49236" assignTo="#{a4jDemo.population}"/>
+                <a4j:param name="answer" value="20 + 22" noEscape="true" assignTo="#{a4jDemo.answer}"/>
+                <f:param name="origin" value="bouton"/>
+            </a4j:commandButton>
+            <h:outputText id="picked" value="#{a4jDemo.pickedText}"/>
+
+            <ul id="communes">
+                <a4j:repeat id="list" value="#{communes.all}" var="c" rows="3" first="2" iterationStatusVar="st">
+                    <li>
+                        #{st.index + 1}.
+                        <a4j:commandLink id="choose" value="#{c.name}" action="#{a4jDemo.pick}" render="picked">
+                            <a4j:param name="commune" value="#{c.name}" assignTo="#{a4jDemo.picked}"/>
+                        </a4j:commandLink>
+                    </li>
+                </a4j:repeat>
+            </ul>
+
+            <a4j:commandButton id="listen" value="Écouter" action="#{a4jDemo.afterListener}" render="listened">
+                <a4j:actionListener listener="#{a4jDemo.onAction}"/>
+            </a4j:commandButton>
+            <h:outputText id="listened" value="#{a4jDemo.listened}"/>
+
+            <!-- ======================================================== jsFunction -->
+            <h2>Fonction JavaScript</h2>
+            <a4j:jsFunction name="loadCommune" action="#{a4jDemo.load}" render="loadedPanel"
+                            oncomplete="document.getElementById('jsDone').textContent = 'terminé'">
+                <a4j:param name="name" assignTo="#{a4jDemo.loaded}"/>
+            </a4j:jsFunction>
+            <button type="button" id="callJs" class="fr-btn fr-btn--secondary"
+                    onclick="loadCommune('Vitré')">Charger Vitré</button>
+            <!-- render target always present: the text itself is not rendered at first -->
+            <a4j:outputPanel id="loadedPanel">
+                <h:outputText id="loaded" value="Chargée : #{a4jDemo.loaded}" rendered="#{a4jDemo.loaded != null}"/>
+            </a4j:outputPanel>
+            <span id="jsDone"></span>
+
+            <!-- ======================================================== a4j:ajax englobant -->
+            <h2>Ajax englobant</h2>
+            <a4j:ajax render="echo">
+                <h:outputLabel for="dept" value="Département"/>
+                <h:selectOneMenu id="dept" value="#{a4jDemo.department}">
+                    <f:selectItem itemLabel="Choisir" noSelectionOption="true"/>
+                    <f:selectItems value="#{communes.departments}"/>
+                </h:selectOneMenu>
+                <h:outputLabel for="size" value="Taille"/>
+                <h:inputText id="size" value="#{a4jDemo.size}"/>
+            </a4j:ajax>
+            <h:outputText id="echo" value="#{a4jDemo.department} / #{a4jDemo.size}"/>
+        </h:form>
+
+        <!-- ============================================================ region -->
+        <h2>Région</h2>
+        <h:form id="regionForm">
+            <a4j:region id="cityRegion">
+                <h:outputLabel for="city" value="Commune"/>
+                <h:inputText id="city" value="#{a4jDemo.city}" required="true"/>
+                <a4j:commandButton id="checkCity" value="Vérifier la commune" action="#{a4jDemo.checkCity}"
+                                   render="cityResult"/>
+            </a4j:region>
+            <h:outputText id="cityResult" value="#{a4jDemo.cityResult}"/>
+
+            <h:outputLabel for="other" value="Autre champ obligatoire"/>
+            <h:inputText id="other" value="#{a4jDemo.other}" required="true"/>
+            <rich:message id="otherMessage" for="other"/>
+            <a4j:commandButton id="checkAll" value="Tout vérifier" action="#{a4jDemo.checkCity}"/>
+        </h:form>
+
+        <!-- ============================================================ poll -->
+        <h2>Interrogation périodique</h2>
+        <h:form id="pollForm">
+            <a4j:poll id="poll" interval="400" enabled="#{a4jDemo.polling}" action="#{a4jDemo.tick}"
+                      render="ticks poll"/>
+            <a4j:commandButton id="start" value="Démarrer" action="#{a4jDemo.startPolling}" render="poll ticks"/>
+            <h:outputText id="ticks" value="#{a4jDemo.ticks}"/>
+        </h:form>
+    </main>
+</h:body>
+</html>

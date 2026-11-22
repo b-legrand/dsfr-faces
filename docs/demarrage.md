@@ -164,6 +164,7 @@ Tests couverts :
 | `tests/showcase.spec.ts` | chargement du DSFR, erreurs des champs obligatoires, validation au blur, envoi ajax et non ajax |
 | `tests/components.spec.ts` | composants `dsfr:` de la phase 2 (`composants.xhtml`) : champs et conversions, tableau trié et paginé, modale (ajax, API JS), lien d'action, accordéons (état gardé), onglets ajax et client, panneau |
 | `tests/richfaces-components.spec.ts` | page RichFaces « catalogue » migrée par `sed` : `rich:dataTable` / `dataScroller`, `a4j:commandLink` + `#{rich:component}.show()`, `rich:panel`, `rich:collapsiblePanel`, `rich:accordion`, `rich:tabPanel`, `rich:calendar`, `rich:select` |
+| `tests/richfaces-a4j.spec.ts` | page RichFaces « a4j » migrée par `sed` : `a4j:outputPanel` (`ajaxRendered`, cible d'un contenu conditionnel), `a4j:status` global et nommé, `a4j:param` (`assignTo` converti, `noEscape`, avec `f:param`), `a4j:repeat`, `a4j:actionListener`, `a4j:jsFunction`, `a4j:ajax` englobant, `a4j:region`, `a4j:poll` |
 | `tests/richfaces-fields.spec.ts` | migration facultative, sur une page distincte (`sed` puis `dsfr-faces-migrate`) : groupes `dsfr:field`, mention obligatoire et ARIA, état d'erreur rafraîchi en ajax sans `render`, saisie `keyup` non interrompue, `h:panelGrid` laissé tel quel |
 | `tests/richfaces-migration.spec.ts` | page RichFaces migrée par `sed` : en-tête DSFR injecté, classes DSFR sur les `h:` visibles, `rich:clientId`, `a4j:ajax` et `rich:message` (`ajaxRendered`), `a4j:commandButton` avec `render` hors du formulaire et `oncomplete` |
 

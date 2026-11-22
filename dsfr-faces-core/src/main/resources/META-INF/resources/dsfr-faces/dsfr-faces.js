@@ -6,6 +6,10 @@
  *   DsfrFaces.component('form-tabs').switchToItem('b')  // dsfr:tabPanel, dsfr:accordion
  *   DsfrFaces.component('form-panel').switchPanel()     // dsfr:collapsiblePanel
  *
+ *   DsfrFaces.params(element, {nom: valeur})          // paramètres calculés dans le navigateur
+ *                                                      // (a4j:param noEscape="true"), ajoutés au
+ *                                                      // formulaire le temps d'une requête
+ *
  * S'appuie sur l'API JS du DSFR (dsfr(element).modal...) et sur les boutons rendus par les composants,
  * qui gardent ainsi leur état (champ caché, requête ajax des onglets).
  */
@@ -89,7 +93,30 @@
     }
   }
 
-  window.DsfrFaces = { component: component };
+  /**
+   * Adds hidden fields to the form of the element for the request about to be sent (faces.ajax.request
+   * serializes the form synchronously), then removes them.
+   */
+  function params(element, values) {
+    var form = element && element.closest ? element.closest('form') : null;
+    if (!form) {
+      return;
+    }
+    var added = [];
+    Object.keys(values).forEach(function (name) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = values[name] === null || values[name] === undefined ? '' : String(values[name]);
+      form.appendChild(input);
+      added.push(input);
+    });
+    setTimeout(function () {
+      added.forEach(function (input) { input.remove(); });
+    }, 0);
+  }
+
+  window.DsfrFaces = { component: component, params: params };
 
   function start() {
     openShown();

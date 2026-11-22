@@ -143,8 +143,16 @@ On ne peut pas garder RichFaces pour `a4j:` (ni pour le reste) sous Jakarta Face
 | `rich:dataTable`, `rich:column`, `rich:dataScroller`, `rich:panel`, `rich:collapsiblePanel`, `rich:accordion`, `rich:accordionItem`, `rich:tabPanel`, `rich:tab`, `rich:popupPanel`, `rich:calendar`, `rich:select` | composants `dsfr:` équivalents, voir [composants.md](composants.md) |
 | `a4j:commandLink` | `dsfr:commandLink` avec ajax sur `action`, comme `a4j:commandButton` |
 | `rich:message` | `dsfr:message` (`fr-messages-group`), `ajaxRendered` par défaut |
-| `a4j:ajax` | `AjaxBehavior` standard sur le composant parent. Prend en charge `event` (par défaut, l'événement par défaut du parent), `execute` (par défaut `@this`), `render`, `listener` (avec ou sans `AjaxBehaviorEvent`), `disabled`, `immediate`, `resetValues`, `limitRender`, `onbegin`, `onbeforedomupdate`, `oncomplete`, `onerror` et `delay` |
-| `a4j:commandButton` | `dsfr:button` avec ajax sur `action`. `execute` vaut `@form` par défaut ; `render`, `oncomplete`, `limitRender`… comme pour `a4j:ajax`. `onclick` est exécuté avant la requête (`return confirm(…)` l'annule). |
+| `a4j:ajax` | `AjaxBehavior` standard. Imbriqué : sur le composant parent. Englobant (`<a4j:ajax>` autour de composants) : sur chaque composant du corps qui gère l'événement ; un composant qui a déjà son propre ajax pour cet événement le garde. Prend en charge `event` (par défaut, l'événement par défaut de chaque composant), `execute` (par défaut `@this`), `render`, `listener` (avec ou sans `AjaxBehaviorEvent`), `disabled`, `immediate`, `resetValues`, `limitRender`, `status`, `onbegin`, `onbeforedomupdate`, `oncomplete`, `onerror` et `delay` |
+| `a4j:commandButton` | `dsfr:button` avec ajax sur `action`. `execute` vaut `@form` par défaut ; `render`, `oncomplete`, `limitRender`, `status`… comme pour `a4j:ajax`. `onclick` est exécuté avant la requête (`return confirm(…)` l'annule). Les `f:param` et `a4j:param` enfants sont envoyés avec la requête. |
+| `a4j:outputPanel` | `span` (ou `div` avec `layout="block"`) toujours rendu avec son identifiant : cible `render` d'un contenu affiché sous condition. `ajaxRendered="true"` le rafraîchit à chaque requête. |
+| `a4j:status` | Indicateur de requête : contenu `start` pendant la requête, `stop` ensuite, `error` après une erreur (attributs `startText` / `stopText` / `errorText`, facettes, `*Style`, `*StyleClass`, `onstart`, `onstop`, `onsuccess`, `onerror`). Sans `name` : suit les requêtes qui ne nomment pas d'indicateur ; avec `name` : seulement celles dont la source porte `status="nom"`. Rendu avec `role="status"`. |
+| `a4j:region` | Les contrôles a4j qu'elle contient traitent la région par défaut (au lieu du formulaire ou de `@this`) ; `execute="@region"` la désigne (toute la vue sans région). Rendue en `<div style="display:contents">`, sans effet sur la mise en page. |
+| `a4j:param` | Paramètre de requête (`name`, `value`) dans une commande ou un `a4j:jsFunction`. Sa valeur est convertie (attribut `converter`, sinon selon le type d'`assignTo`) puis écrite dans `assignTo`, avant l'action. `noEscape="true"` : `value` est une expression JavaScript évaluée au clic. |
+| `a4j:jsFunction` | Fonction JavaScript globale (`name`) qui envoie une requête ajax (`action`, `execute`, `render`, `oncomplete`…) ; ses arguments sont les `a4j:param` enfants, dans l'ordre. `execute` vaut `@form` par défaut. |
+| `a4j:poll` | Requête ajax toutes les `interval` ms (1000 par défaut) tant que `enabled` ; la suivante part quand la précédente est terminée. Rafraîchir le composant applique un nouvel `enabled` ; `ontimer` peut annuler un envoi. `execute` vaut `@this` par défaut, pour ne pas valider le formulaire. |
+| `a4j:repeat` | `ui:repeat` de l'implémentation, avec les noms RichFaces : `rows`, `first`, `iterationStatusVar` (`index`, `first`, `last`, `even`, `odd`). Un `rows` plus grand que la liste est accepté. |
+| `a4j:actionListener` | Écouteur d'action du composant parent : `listener` (méthode avec ou sans `ActionEvent`), `type` ou `binding`. |
 | Fonctions EL | `clientId`, `component`, `element`, `findComponent`, `isUserInRole` et `jQuerySelector` |
 | En-tête | Les ressources DSFR (`dsfr:head`) sont ajoutées automatiquement au `h:head` des vues qui n'ont pas de `dsfr:head`, comme RichFaces injectait les siennes |
 
@@ -172,11 +180,21 @@ Détails :
 
   Ajouter alors `<dsfr:head/>` aux gabarits.
 
+- **Soumission partielle.** Mojarra n'envoie que les champs contenus dans les éléments listés dans
+  `execute` (quand `execute` ne contient ni `@form` ni `@all`). Un identifiant d'`execute` doit donc exister
+  dans le DOM : c'est pour cela qu'`a4j:region` rend un `div`. Même règle pour `render` : une cible rendue
+  sous condition (`rendered="…"`) doit être placée dans un `a4j:outputPanel`, comme avec RichFaces.
+- **`a4j:jsFunction` et `a4j:poll`** doivent être dans un formulaire (comme avec RichFaces) : leur requête
+  part de leur élément.
+
 ### Pas encore pris en charge
 
-- La forme englobante de `a4j:ajax` (`<a4j:ajax>` autour de composants) : seule la forme imbriquée dans
-  un composant fonctionne.
-- `status`, `bypassUpdates`, `data`, `focus` et `requestGroupingId` sont acceptés mais ignorés.
+- `bypassUpdates`, `data`, `focus` et `requestGroupingId` sont acceptés mais ignorés.
+- `a4j:status` sans nom suit toutes les requêtes qui ne nomment pas d'indicateur : il n'est pas limité au
+  formulaire ou à la région qui le contient, comme dans RichFaces.
+- `a4j:repeat` ne peut pas être piloté par `rich:dataScroller` ; `rowKeyVar` est ignoré.
+- `a4j:status`, `a4j:poll` et `a4j:jsFunction` utilisent des scripts en ligne (et `new Function` pour les
+  callbacks d'`a4j:status`) : incompatibles avec une CSP stricte.
 - `#{rich:component('x')}` renvoie un objet avec `show()` / `hide()` (modale), `switchToItem(nom)`
   (onglets, accordéons) et `switchPanel()` (panneau repliable) ; les autres méthodes de l'API RichFaces
   n'existent pas.
@@ -315,17 +333,17 @@ Légende de priorité :
 
 | Balise | Implémentation prévue | Prio. |
 |---|---|---|
-| `a4j:ajax` | ✅ `AjaxBehavior` standard (celui de `f:ajax`) ; `status` ignoré, pas de forme englobante | P1 |
+| `a4j:ajax` | ✅ `AjaxBehavior` standard (celui de `f:ajax`), formes imbriquée et englobante | P1 |
 | `a4j:commandButton` | ✅ bouton DSFR + ajax implicite (`execute="@form"`) | P1 |
 | `a4j:commandLink` | ✅ lien DSFR (`fr-link`) + ajax implicite (`execute="@form"`) | P1 |
-| `a4j:outputPanel` | `div`/`span` ; `ajaxRendered="true"` (le mécanisme existe déjà dans le cœur) | P1 |
-| `a4j:repeat` | `ui:repeat` | P1 |
-| `a4j:jsFunction` | `h:commandScript` (Faces 2.3+) | P1 |
-| `a4j:status` | indicateur via `faces.ajax.addOnEvent` | P2 |
-| `a4j:region` | portée d'`execute` | P2 |
-| `a4j:param` | `f:param` + `assignTo` | P2 |
-| `a4j:poll` | minuterie + `faces.ajax.request` | P2 |
-| `a4j:actionListener` | `f:actionListener` | P2 |
+| `a4j:outputPanel` | ✅ `span` / `div`, `ajaxRendered` | P1 |
+| `a4j:repeat` | ✅ `ui:repeat` de l'implémentation, attributs RichFaces | P1 |
+| `a4j:jsFunction` | ✅ fonction JS globale, arguments `a4j:param` | P1 |
+| `a4j:status` | ✅ indicateur via `faces.ajax.addOnEvent`, nommé ou non | P2 |
+| `a4j:region` | ✅ portée par défaut d'`execute`, `@region` | P2 |
+| `a4j:param` | ✅ paramètre de requête + `assignTo` converti, `noEscape` | P2 |
+| `a4j:poll` | ✅ minuterie + `faces.ajax.request` | P2 |
+| `a4j:actionListener` | ✅ `listener`, `type`, `binding` | P2 |
 | `a4j:push` | `f:websocket` | P3 |
 | `a4j:queue`, `a4j:attachQueue`, `a4j:log` | ignorés (avertissement en mode Development) | P3 |
 | `a4j:mediaOutput` | — | HP |
@@ -372,12 +390,13 @@ Les pages sont présentables ; le passage aux balises `dsfr:` reste recommandé 
 
 - ✅ `rich:messages` et `rich:message` sont rafraîchis à **chaque** requête ajax (`ajaxRendered`), sans
   `render` explicite. Sans ce comportement, une application migrée perdrait ses messages d'erreur ajax.
-- ✅ `a4j:commandButton` est ajax par défaut avec `execute="@form"` (`a4j:commandLink` reste à faire).
+- ✅ `a4j:commandButton` et `a4j:commandLink` sont ajax par défaut avec `execute="@form"` (la région
+  englobante dans un `a4j:region`).
 - ✅ `render` accepte des identifiants séparés par des virgules et des expressions EL, et trouve les
   composants dans toute la vue.
 - ✅ Les ressources RichFaces étaient injectées automatiquement : les ressources DSFR le sont aussi.
-- `#{rich:component('id')}` renvoie un objet JS avec `show()`, `hide()`, `switchToItem()`… Une petite
-  API `RichFaces.component(id)` sera fournie au-dessus du JS du DSFR (`dsfr(el).modal.disclose()`…).
+- ✅ `#{rich:component('id')}` renvoie un objet JS avec `show()`, `hide()`, `switchToItem()`…
+  (`RichFaces.component(id)`, au-dessus du JS du DSFR).
 
 ## Attributs sans équivalent
 

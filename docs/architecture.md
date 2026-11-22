@@ -33,6 +33,12 @@ dsfr-faces/
 │   └── fr.gouv.dsfr.faces.richfaces
 │       ├── A4jAjaxHandler, A4jCommandHandler, AjaxSupport   a4j: -> AjaxBehavior standard
 │       ├── RichAjaxBehavior       AjaxBehavior + recherche d'identifiants dans toute la vue
+│       ├── AjaxIds                execute / render à la RichFaces (@region, défauts dans une région)
+│       ├── A4jOutputPanel, A4jStatus, A4jRegion   composants + renderers
+│       ├── A4jParam (+ Handler, ParamsListener)   paramètre de requête, assignTo avant l'action
+│       ├── A4jJsFunction, A4jPoll (+ A4jRequestRendererBase)   requête faces.ajax.request écrite par dsfr-faces
+│       ├── A4jRepeatHandler, RepeatEndExpression   a4j:repeat = ui:repeat de l'implémentation
+│       ├── A4jActionListenerHandler
 │       ├── RichFunctions          fonctions EL rich:*
 │       └── AutoHeadListener       ajoute dsfr:head aux vues qui n'en ont pas
 ├── dsfr-faces-migrate/      outil de migration facultative (Java, sans dépendance) : dsfr:field
@@ -69,7 +75,20 @@ Les CSS du DSFR référencent polices et icônes par des `url(...)` relatives. L
 
 Pas de couche ajax maison : les composants implémentent `ClientBehaviorHolder` et acceptent `<f:ajax>`.
 La compatibilité `a4j:` (voir [migration](migration-richfaces.md)) est construite au-dessus du même
-`AjaxBehavior` que `f:ajax` : le script client est produit par l'implémentation Faces.
+`AjaxBehavior` que `f:ajax` : le script client est produit par l'implémentation Faces. Les deux balises
+sans composant déclencheur (`a4j:jsFunction`, `a4j:poll`) écrivent elles-mêmes un appel
+`faces.ajax.request(element, null, {execute, render, params, onevent})`, avec leur élément comme source ;
+leur renderer met l'action en file quand le composant est la source de la requête.
+
+- **Paramètres.** Les enfants `UIParameter` d'une commande (`f:param`, `a4j:param`) sont passés comme
+  paramètres du `ClientBehaviorContext` : l'implémentation les envoie avec la requête. Un paramètre
+  `noEscape` (expression JavaScript) devient un script, chaîné avant la requête, qui ajoute un champ caché
+  au formulaire le temps de la requête (`faces.ajax.request` sérialise le formulaire immédiatement).
+- **Indicateurs.** `richfaces.js` s'abonne à `faces.ajax.addOnEvent` / `addOnError`. Le nom d'indicateur
+  d'une requête (`status="…"`) est posé sur l'élément source par l'`onevent` de la requête ; l'écouteur
+  global le lit dans une microtâche, car l'ordre des deux appels n'est pas garanti.
+- **Soumission partielle.** Mojarra n'envoie que les champs des éléments DOM listés dans `execute` : les
+  composants désignés par `execute` (comme `a4j:region`) rendent donc un élément.
 
 ### Classes DSFR sur les balises `h:` sans réécrire leurs renderers
 
@@ -103,7 +122,8 @@ le début du fichier.
 (`SKIP_UNRENDERED`, `SKIP_ITERATION`) et ajoute à `getRenderIds()` les composants dont l'attribut
 `ajaxRendered` vaut `true`, sauf ceux déjà contenus dans une zone rafraîchie. L'attribut de composant
 `fr.gouv.dsfr.limitRender.<événement>` (posé par `limitRender` des balises `a4j:`) désactive ce
-mécanisme pour la requête.
+mécanisme pour la requête. Pour une requête sans événement de comportement (`faces.ajax.request` direct,
+comme `a4j:jsFunction`), c'est l'attribut `limitRender` de la source qui compte.
 
 Les `dsfr:field` sont ajoutés de la même façon quand leur champ figure dans `getExecuteIds()` (ou sous un
 identifiant exécuté, ou `@all`), sauf si l'événement est une frappe (`keyup`, `keydown`, `keypress`,

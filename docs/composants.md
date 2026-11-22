@@ -332,6 +332,8 @@ contenu est `value`, ou à défaut les enfants.
 
 - **Avec `f:ajax`** (ou en `a4j:commandLink`) : requête ajax.
 - **Sans** : le clic envoie le formulaire, avec les `f:param`.
+- Les `f:param` enfants sont aussi envoyés en ajax (comme pour `dsfr:button`). Un paramètre avec l'attribut
+  `noEscape="true"` a pour valeur une expression JavaScript, évaluée au clic (`DsfrFaces.params`).
 - `onclick` est exécuté d'abord ; s'il renvoie `false`, l'action est annulée.
 
 Le DSFR recommande un bouton pour les actions : le lien sert surtout à la compatibilité.

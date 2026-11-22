@@ -31,9 +31,9 @@ final class AjaxSupport {
     /** Ajax attributes shared by a4j:ajax and the a4j command components. */
     static final Set<String> COMMAND_ATTRIBUTES = Set.of(
             "execute", "render", "onbegin", "onbeforedomupdate", "oncomplete", "onerror",
-            "limitRender", "resetValues", "delay",
+            "limitRender", "resetValues", "delay", "status",
             // RichFaces-only, accepted and ignored for now
-            "status", "bypassUpdates", "data", "focus", "requestGroupingId", "onbeforesubmit");
+            "bypassUpdates", "data", "focus", "requestGroupingId", "onbeforesubmit");
 
     /** RichFaces client event name to Faces ajax status (faces.ajax onevent). */
     private static final Map<String, String> EVENT_STATUS = new LinkedHashMap<>();
@@ -51,7 +51,8 @@ final class AjaxSupport {
      * Creates the behavior and adds it to {@code parent} for {@code event}.
      *
      * @param event          behavior event, or {@code null} for the parent's default event
-     * @param defaultExecute execute when the attribute is absent, or {@code null} (Faces default: @this)
+     * @param defaultExecute execute when the attribute is absent ({@link AjaxIds#REGION_OR_FORM},
+     *                       {@link AjaxIds#REGION_OR_THIS}...)
      * @param behaviorOnly   also map {@code listener}, {@code disabled} and {@code immediate}
      *                       (a4j:ajax); on command components they belong to the component
      */
@@ -157,6 +158,13 @@ final class AjaxSupport {
     private static void onevent(FaceletContext ctx, RichAjaxBehavior behavior, Function<String, TagAttribute> attributes) {
         StringBuilder js = new StringBuilder();
         boolean literal = true;
+        TagAttribute status = attributes.apply("status");
+        if (status != null && !status.getValue().isBlank()) {
+            // named a4j:status: read by richfaces.js (status="…" of the request source)
+            literal &= status.isLiteral();
+            js.append("if(data.status==='begin'&&data.source){data.source.dsfrA4jStatus='")
+                    .append(status.getValue().replace("\\", "").replace("'", "\\'")).append("'}");
+        }
         for (Map.Entry<String, String> entry : EVENT_STATUS.entrySet()) {
             TagAttribute attribute = attributes.apply(entry.getKey());
             if (attribute == null || attribute.getValue().isBlank()) {
